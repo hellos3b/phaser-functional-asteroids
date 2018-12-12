@@ -26,12 +26,6 @@ const getObjectKeys = c_(
       .filter( key => !!key)
 )
 
-const filter = c_(
-  (expression, collection) => collection.filter(expression)
-)
-
-const filterNull = filter(n => !!n)
-
 /* 
   spriteUpdate :: (Phaser.Sprite, State, [Function]) -> null
   Updates the sprite with all the setters to their new values
@@ -51,7 +45,6 @@ export class Sprite extends Phaser.Sprite {
   setState(state, keys) {
     pipe(
       () => getObjectKeys(settersMap, keys || state.$dirty),
-      filterNull,
       pushSpriteUpdate(this, state)
     )()
   }
