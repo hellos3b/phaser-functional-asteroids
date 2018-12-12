@@ -10,6 +10,7 @@ import { Spaceship } from '@/gameobjects/Spaceship'
 
 const initialState = {
   entities: [],
+  timers: [],
   lastAsteroidSpawn: 0,
   asteroidSpawnRate: 1
 }
@@ -20,6 +21,8 @@ export class Game extends Phaser.State {
       ...initialState,
       ...options
     })
+
+    this.startAsteroidTimer()
   }
 
   preload() { }
@@ -38,7 +41,6 @@ export class Game extends Phaser.State {
   }
 
   spawnObject(T, group, props) {
-    console.log("spawn object", {T, group, props})
     return pipe(
       Stage.createObject(this.game, T),
       Stage.addToScene(this.game),
@@ -53,43 +55,42 @@ export class Game extends Phaser.State {
   }
 
   spawnRandomAsteroid() {
-    return pipe(
-      () => ({
-        position: this.randomPosition()
-      }),
-      c_(this.spawnObject.bind(this))(Asteroid, null)
-    )()
+    this.spawnObject(Asteroid, null, {
+      position: this.randomPosition()
+    })
   }
 
   randomPosition() {
-    return {
-      x: Utils.randomBetween(0, this.game.width),
-      y: Utils.randomBetween(0, this.game.height)
-    }
+    const randomX = Utils.randomBetween(0, this.game.width)
+    const randomY = Utils.randomBetween(0, this.game.height)
+    
+    return pipe(
+      () => Utils.randomBetween(0, 4),
+      Utils.findInObject({
+        0: { x: -32, y: randomY },
+        1: { x: this.game.width + 32, y: randomY },
+        2: { x: randomX, y: -32 },
+        3: { x: randomX, y: this.game.height + 32 }
+      }),
+      result => result.get()
+    )()
   }
 
-  spawnAsteroidIfReady() {
-    this.state.lastAsteroidSpawn += Utils.delta(this.game, 1)
-    if (this.asteroidReady()) {
-      this.resetAsteroidTimer()
-      this.spawnRandomAsteroid()
-    }
-  }
-
-  resetAsteroidTimer() {
-    this.state.lastAsteroidSpawn = 0
-  }
-
-  asteroidReady() {
-    return Utils.timerReady(
-      this.state.lastAsteroidSpawn,
-      this.state.asteroidSpawnRate
+  startAsteroidTimer() {
+    this.state.timers.push(
+      new Timer(this.state.asteroidSpawnRate, () => {
+        this.spawnRandomAsteroid()
+        this.startAsteroidTimer()
+      })
     )
   }
 
   update() {
     Stage.updateEntities(this.state.entities)
-
-    this.spawnAsteroidIfReady()
+    Stage.updateTimers(
+      Utils.delta(this.game, 1), 
+      this.state.timers
+    )
+    this.state.timers = this.state.timers.filter(t => !t.done())
   }
 }

@@ -33,6 +33,15 @@ export const updateEntities = c_(
 )
 
 /* 
+  updateTimers :: (Number, [Timers]) -> [Timers]
+*/
+export const updateTimers = c_(
+    (time, timers) => timers.map(
+        t => t.add(time)
+    ).filter(t => !t.done() )
+)
+
+/* 
   addToGroup :: (Group, Entity) -> Gameobject
 */
 export const addToGroup = c_(
