@@ -1,4 +1,5 @@
 /*
+    pipe
     Creates a function that runs a chain of functions
     ex: 
         const fn = pipe(fn1, fn2, fn3)
@@ -15,6 +16,7 @@ export const pipe = function () {
 }
 
 /*
+    c_
     Allows you to run functions by either arguments or curried
     (basically, wrap every function with this to make life easier)
     ex: 
@@ -40,6 +42,90 @@ export const c_ = function (fn) {
 
 	return given([]);
 }
+
+/*
+    OldState
+    Takes in two objects, and will return the original value if defined, if not the new one
+*/
+const OldState = function (currentState, oldState) {
+	const handler = {
+		get(target, prop) {
+			return (oldState[prop] !== undefined) ? oldState[prop] : target[prop]
+		},
+		set() {
+			// The old state should just never be overwritten
+			throw new Error("Cannot modify original state")
+		}
+	}
+
+	return new Proxy(currentState, handler)
+}
+
+/*
+    CleanState
+    Define a json object as a state, and whenever it changes set it to "dirty"
+    ex:
+        const state = CleanState({ foo: "bar" })
+        state.foo = "test"
+        state.$dirty
+        - ["foo"]
+        state.$clean()
+        state.$dirty
+        - []
+*/
+export const State = function (initialState) {
+	// Keep track of which values are set to 'dirty'
+	// It's a set instead of an array because we only care if the values been changed once
+	let dirty = new Set([])
+
+	// Iterate over the initial state, and convert any nested objects into another CleanState
+	let state = Object.entries(initialState)
+		.reduce((res, [key, value]) => {
+			return {
+				...res,
+				[key]: (typeof value === 'object') ? State(value) : value
+			}
+		}, {})
+
+	// Keeps track of the original values of any prop that has changed
+	// gets reset on $clean
+	let oldState = {}
+
+	const handler = {
+		get(target, prop) {
+			// Convert the dirty set into an array (easier to iterate)
+			if (prop === "$dirty") return [...dirty]
+			// Marks the object as clean
+			if (prop === "$clean") {
+				return () => {
+					dirty = new Set([])
+					oldState = {}
+				}
+			}
+			if (prop === "$old") return OldState(state, oldState)
+
+			return target[prop]
+		},
+		set(target, prop, value) {
+			dirty.add(prop)
+			// We only want the first value, so we check if undefined so we don't re-write it
+			// if it gets changed a second time
+			if (oldState[prop] === undefined) {
+				oldState[prop] = target[prop]
+			}
+
+			target[prop] = (typeof value === 'object') ? State(value) : value
+
+			return true
+		}
+	}
+
+	return new Proxy(state, handler)
+}
+
+
+// useful for debugging
+window.c_ = c_
 
 // /*
 //     Here's my mini test cases, we have to functions that do a simple add and subtract

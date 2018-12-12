@@ -84,6 +84,7 @@ const copyAssets = new CopyWebpackPlugin([
 ])
 
 module.exports = {
+  devtool: 'source-map',
 
   module: {
     rules: [
