@@ -16,7 +16,7 @@ const modifiers = {
 }
 
 /* 
-  getObjectKeys :: (Object, [String]) -> [Any]
+  findInObject :: (Object, String) -> Maybe(Any)
   Returns an array of 
 */
 const findInObject = c_(
@@ -24,7 +24,7 @@ const findInObject = c_(
 )
 
 /* 
-  spriteUpdate :: (Phaser.Sprite, State, Maybe(Function)) -> null
+  commitSpriteUpdate :: (Phaser.Sprite, State, Maybe(Function)) -> null
   Updates the sprite with all the setters to their new values
 */
 const commitSpriteUpdate = c_(
@@ -35,7 +35,7 @@ const commitSpriteUpdate = c_(
 )
 
 /* 
-  prefixPropertyName :: [String] -> [String]
+  prefixPropertyName :: String -> String
   Converts property name to a set function name, i.e. position -> setPosition
 */
 const prefixPropertyName = c_(
