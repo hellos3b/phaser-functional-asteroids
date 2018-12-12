@@ -1,4 +1,16 @@
 /*
+    Maybe
+    Wraps a nullable value
+*/
+export const Maybe = function(T) {
+	return {
+		get: () => T,
+		getOrElse: (option) =>
+			(T === undefined) ? option : T
+	}
+}
+
+/*
     pipe
     Creates a function that runs a chain of functions
     ex: 

@@ -1,6 +1,5 @@
 import Phaser from "phaser"
-import { c_ } from "@/utils/functional"
-import { pipe } from "../utils/functional";
+import { c_, Maybe, pipe } from "@/utils/functional"
 
 // Holds a mapping to set state values to sprite values
 const modifiers = {
@@ -20,29 +19,29 @@ const modifiers = {
   getObjectKeys :: (Object, [String]) -> [Any]
   Returns an array of 
 */
-const filterObject = c_(
-  (obj, keys) => 
-    keys.map( key => obj[key])
-      .filter( key => !!key)
+const findInObject = c_(
+  (obj, key) => Maybe(obj[key])
 )
 
 /* 
-  spriteUpdate :: (Phaser.Sprite, State, [Function]) -> null
+  spriteUpdate :: (Phaser.Sprite, State, Maybe(Function)) -> null
   Updates the sprite with all the setters to their new values
 */
-const pushSpriteUpdate = c_(
-  (sprite, state, setters) => setters.forEach( s => s(sprite, state) )
+const commitSpriteUpdate = c_(
+  (sprite, state, modifier) => 
+    modifier
+      .getOrElse(()=>{})
+      .call(null, sprite, state)
 )
 
 /* 
   prefixPropertyName :: [String] -> [String]
   Converts property name to a set function name, i.e. position -> setPosition
 */
-const prefixPropertyNames = c_(
-  strings => strings
-    .map( str => 
-      "set" + str.charAt(0).toUpperCase() + str.substring(1)
-    )
+const prefixPropertyName = c_(
+  str => "set" 
+      + str.charAt(0).toUpperCase() 
+      + str.substring(1)
 )
 
 
@@ -55,10 +54,15 @@ export class Sprite extends Phaser.Sprite {
   }
 
   setState(state, keys) {
-    pipe(
-      () => prefixPropertyNames(keys || state.$dirty),
-      filterObject(modifiers),
-      pushSpriteUpdate(this, state)
-    )()
+    keys = keys || state.$dirty
+    keys.forEach( k => this.updateProperty(state, k) )
+  }
+
+  updateProperty(state, key) {
+    return pipe(
+      prefixPropertyName,
+      findInObject(modifiers),
+      commitSpriteUpdate(this, state)
+    )(key)
   }
 }
