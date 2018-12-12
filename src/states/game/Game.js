@@ -28,10 +28,6 @@ export class Game extends Phaser.State {
   preload() { }
 
   create() {
-    this.spawnObject(Asteroid, null, {
-      position: this.randomPosition()
-    })
-
     this.spawnObject(Spaceship, null, {
       position: {
         x: this.world.centerX,
@@ -50,25 +46,31 @@ export class Game extends Phaser.State {
           ...this.state.entities,
           entity
         ]
+        return entity
       }
     )(props) 
   }
 
   spawnRandomAsteroid() {
     this.spawnObject(Asteroid, null, {
-      position: this.randomPosition()
-    })
+        position: this.randomPositionOffScreen(),
+        speed: Utils.randomBetween(50, 150)
+      })
+      .moveTowards({
+        x: this.game.world.centerX + Utils.randomBetween(-300, 300), 
+        y: this.game.world.centerY + Utils.randomBetween(-300, 300)
+      })
   }
 
-  randomPosition() {
-    const randomX = Utils.randomBetween(0, this.game.width)
-    const randomY = Utils.randomBetween(0, this.game.height)
-    
+  randomPositionOffScreen() {
+    const randomX = Utils.randomBetween(0, this.game.width),
+          randomY = Utils.randomBetween(0, this.game.height)
+
     return pipe(
       () => Utils.randomBetween(0, 4),
       Utils.findInObject({
         0: { x: -32, y: randomY },
-        1: { x: this.game.width + 32, y: randomY },
+        1: { x: this.game.width + 32, y:randomY },
         2: { x: randomX, y: -32 },
         3: { x: randomX, y: this.game.height + 32 }
       }),

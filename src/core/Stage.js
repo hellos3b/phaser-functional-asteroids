@@ -1,6 +1,6 @@
 import { c_, pipe } from '@/utils/functional'
 import { Asteroid } from '@/gameobjects/Asteroid'
-import { randomBetween } from '../utils';
+import * as Utils from '../utils'
 
 /* 
   createAsteroid :: (Phaser.Game, T<GameObject>, Object) -> Asteroid

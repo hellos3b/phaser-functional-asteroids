@@ -17,6 +17,13 @@ export const delta = c_(
 )
 
 /* 
+  combineObject :: (Object, Object) -> Object
+*/
+export const combineObject = c_( 
+  (obj1, obj2) => Object.assign(obj1, obj2)
+)
+
+/* 
   randomBetween :: (Int, Int) -> Int
 */
 export const randomBetween = c_(

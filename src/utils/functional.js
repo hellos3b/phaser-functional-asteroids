@@ -23,7 +23,11 @@ export const pipe = function () {
 	const args = [...arguments]
 
 	return function () {
-		const initial = args.shift().apply(this, arguments)
+		const fn = args.shift()
+		if (!(typeof fn === 'function')) {
+			console.error("Pipe argument is not a function:", fn)
+		}
+		const initial = fn.apply(this, arguments)
 		return args.reduce((result, fn) => fn.call(this, result), initial)
 	}
 }
