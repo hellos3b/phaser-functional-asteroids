@@ -1,0 +1,12 @@
+{
+    "parserOptions": {
+        "ecmaVersion": 9,
+        "sourceType": "module"
+    },
+    "rules": {
+        "semi": 0
+    },
+    "ecmaFeatures": {
+        "experimentalObjectRestSpread": true
+    }
+}

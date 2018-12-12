@@ -1,19 +1,20 @@
 import Phaser from 'phaser'
 import WebFont from 'webfontloader'
-import { WEBFONTS } from '@/config/game'
+import * as config from '@/config/game'
 
-export default class extends Phaser.State {
+export class Boot extends Phaser.State {
   init() {
-    this.stage.backgroundColor = '#EDEEC9'
+    console.log("boot start")
+    this.stage.backgroundColor = config.BACKGROUND_COLOR
     this.fontsReady = false
     this.fontsLoaded = this.fontsLoaded.bind(this)
   }
 
   preload() {
-    if (config.webfonts.length) {
+    if (config.WEBFONTS.length) {
       WebFont.load({
         google: {
-          families: WEBFONTS
+          families: config.WEBFONTS
         },
         active: this.fontsLoaded
       })
@@ -27,10 +28,10 @@ export default class extends Phaser.State {
   }
 
   render() {
-    if (config.webfonts.length && this.fontsReady) {
+    if (config.WEBFONTS.length && this.fontsReady) {
       this.state.start('Splash')
     }
-    if (!config.webfonts.length) {
+    if (!config.WEBFONTS.length) {
       this.state.start('Splash')
     }
   }

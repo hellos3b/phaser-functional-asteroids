@@ -1,14 +1,14 @@
 /* globals __DEV__ */
 import Phaser from 'phaser'
-import Mushroom from '../sprites/Mushroom'
-import lang from '../lang'
+import Mushroom from '@/sprites/Mushroom'
 
-export default class extends Phaser.State {
+export class Game extends Phaser.State {
   init() { }
   preload() { }
 
   create() {
-    const bannerText = lang.text('welcome')
+    console.log("game start")
+    const bannerText = 'welcome'
     let banner = this.add.text(this.world.centerX, this.game.height - 80, bannerText, {
       font: '40px Bangers',
       fill: '#77BFA3',

@@ -85,7 +85,7 @@ module.exports = {
       'phaser': phaser,
       'pixi': pixi,
       'p2': p2,
-      '@': path.join(___dirname, 'src')
+      '@': path.join(__dirname, 'src')
     }
   }
 }
