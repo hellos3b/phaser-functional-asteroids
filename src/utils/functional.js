@@ -4,6 +4,7 @@
 */
 export const Maybe = function(T) {
 	return {
+		apply: (fn) => T && fn(T),
 		get: () => T,
 		getOrElse: (option) =>
 			(T === undefined) ? option : T
@@ -73,6 +74,9 @@ const OldState = function (currentState, oldState) {
 	return new Proxy(currentState, handler)
 }
 
+const isObject = (T) => 
+	(typeof T === 'object' && !(T instanceof Array))
+
 /*
     CleanState
     Define a json object as a state, and whenever it changes set it to "dirty"
@@ -95,7 +99,7 @@ export const State = function (initialState) {
 		.reduce((res, [key, value]) => {
 			return {
 				...res,
-				[key]: (typeof value === 'object') ? State(value) : value
+				[key]: isObject(value) ? State(value) : value
 			}
 		}, {})
 
@@ -126,7 +130,7 @@ export const State = function (initialState) {
 				oldState[prop] = target[prop]
 			}
 
-			target[prop] = (typeof value === 'object') ? State(value) : value
+			target[prop] = isObject(value) ? State(value) : value
 
 			return true
 		}

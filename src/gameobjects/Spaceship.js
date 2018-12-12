@@ -7,7 +7,7 @@ const defaultState = {
         x: 100,
         y: 100
     },
-    frame: 1,
+    frame: 0,
     anchor: {
         x: 0.5,
         y: 0.5
@@ -15,7 +15,7 @@ const defaultState = {
     asset: 'spritesheet'
 }
 
-export class Asteroid {
+export class Spaceship {
 
     constructor(game, opt) {
         this.game = game
@@ -23,16 +23,15 @@ export class Asteroid {
             ...defaultState,
             ...opt
         })
-        console.log("asteroid", opt, this.state)
 
         this.sprite = new SpriteObject(game, this.state)
     }
 
     update() {
-        this.state.position = { 
-            x: this.state.position.x,
-            y: this.state.position.y  + Utils.delta(this.game, 100)
-        }
+        // this.state.position = { 
+        //     x: this.state.position.x,
+        //     y: this.state.position.y  + Utils.delta(this.game, 100)
+        // }
         this.sprite.setState(this.state)
         this.state.$clean()
     }

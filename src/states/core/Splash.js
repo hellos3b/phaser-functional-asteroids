@@ -1,5 +1,4 @@
 import Phaser from 'phaser'
-import { centerGameObjects } from '@/utils/utils'
 import * as Sprites from '@/config/sprites'
 
 
