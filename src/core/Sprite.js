@@ -1,39 +1,37 @@
 import Phaser from "phaser"
-import { c_, pipe } from "@/utils/functional"
+import { c_ } from "@/utils/functional"
+import { pipe } from "../utils/functional";
 
+// Holds a mapping to set state values to sprite values
 const settersMap = {
-  position: c_((sprite, value) => {
-    sprite.x = value.x
-    sprite.y = value.y
+  position: c_((sprite, state) => {
+    sprite.x = state.position.x
+    sprite.y = state.position.y
   }),
-  frame: c_((sprite, value) => {
-    sprite.frame = value
+  frame: c_((sprite, state) => {
+    sprite.frame = state.frame
   }),
-  anchor: c_((sprite, value) => {
-    sprite.anchor.setTo(value.x, value.y)
+  anchor: c_((sprite, state) => {
+    sprite.anchor.setTo(state.anchor.x, state.anchor.y)
   })
 }
 
 /* 
-  getObjectKeys :: (Object, keys) -> Object
-
+  getObjectKeys :: (Object, [String]) -> [Any]
+  Returns an object with the keys, but only if they exist
 */
 const filterObjectKeys = c_(
   (obj, keys) => 
-    keys.reduce( (res, key) => {
-        if (obj[key]) res[key] = obj[key]
-        return res
-      }, {})
+    keys.map( key => obj[key])
+      .filter( key => !!key)
 )
 
-// execFunctions :: (Object, State, [ [key], [callback] ])
-
-const spriteUpdate = c_((context, values, setters) => 
-  Object
-    .entries(setters)
-    .forEach( ([key, callback]) => {
-      callback(context, values[key]) 
-    })
+/* 
+  spriteUpdate :: (Phaser.Sprite, State, Object(key->Function)) -> null
+  Updates the sprite with all the setters to their new values
+*/
+const pushSpriteUpdate = c_((sprite, state, setters) => 
+  setters.forEach( s => s(sprite, state) )
 )
 
 export class Sprite extends Phaser.Sprite {
@@ -45,8 +43,10 @@ export class Sprite extends Phaser.Sprite {
   }
 
   setState(state, keys) {
-    const callbacks = filterObjectKeys(settersMap, keys || state.$dirty)
-    spriteUpdate(this, state, callbacks)
+    // If no specific keys provided, only update the dirty values
+    pipe(
+      () => filterObjectKeys(settersMap, keys || state.$dirty),
+      pushSpriteUpdate(this, state)
+    )()
   }
-  
 }
