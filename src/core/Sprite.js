@@ -14,9 +14,37 @@ export const modifiers = {
 
 	setAnchor: c_((sprite, state) => {
 		sprite.anchor.setTo(state.anchor.x, state.anchor.y)
+	}),
+
+	setAnimation: c_((sprite, state) => {
+		if (state.animation) {
+			sprite.animations.play(state.animation)
+		} else {
+			sprite.animations.stop()
+			sprite.frame = state.frame
+		}
+	}),
+
+	setAngle: c_((sprite, state) => {
+		sprite.angle = state.angle
 	})
 
 }
+
+/* 
+  loadAnimations :: (Phaser.Sprite, Object) -> null
+*/
+export const loadAnimations = c_(
+	(sprite, animations) => Object.keys(animations)
+		.forEach( name => {
+		sprite.animations.add(
+			name,
+			animations[name].frames,
+			animations[name].fps,
+			animations[name].loop
+		)
+		})
+)
 
 /* 
   commitSpriteUpdate :: (Phaser.Sprite, State, Maybe(Function)) -> null

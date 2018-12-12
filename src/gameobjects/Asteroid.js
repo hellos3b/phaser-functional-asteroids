@@ -1,10 +1,11 @@
 import { SpriteObject } from '@/core/SpriteObject'
-import { c_, State } from '@/utils/functional'
+import { c_, State, pipe } from '@/utils/functional'
 import * as Utils from '@/utils'
 import * as Vector2 from '@/utils/Vector2'
 import * as Physics from '@/core/Physics'
 
 const defaultState = {
+    alive: true,
     position: {
         x: 100,
         y: 100
@@ -15,7 +16,6 @@ const defaultState = {
         y: 0.5
     },
     asset: 'spritesheet',
-    speed: 100,
     velocity: {
         x: 0,
         y: 0
@@ -35,14 +35,35 @@ export class Asteroid {
     }
 
     update() {
-        Physics.update(this.state, Utils.delta(this.game, 1))
+        this.updatePhysics()
+
+        if (this.outOfBounds()) return this.kill()
+
         this.sprite.setState(this.state)
         this.state.$clean()
     }
 
-    moveTowards(target) {
+    updatePhysics() {
+        const delta = Utils.delta(this.game, 1)
+        pipe(
+            Physics.applyVelocity(delta)
+        )(this.state)
+    }
+
+    outOfBounds() {
+        return this.state.position.x < -50 || this.state.position.x > this.game.width + 50
+            || this.state.position.y < -50 || this.state.position.y > this.game.height + 50
+    }
+
+    moveTowards(target, speed) {
         this.state.velocity = Vector2
             .directionTowards(this.state.position, target)
             .normalize()
+            .multiply(speed)
+    }
+
+    kill() {
+        this.sprite.destroy()
+        this.state.alive = false
     }
 }

@@ -57,9 +57,9 @@ export class Game extends Phaser.State {
         speed: Utils.randomBetween(50, 150)
       })
       .moveTowards({
-        x: this.game.world.centerX + Utils.randomBetween(-300, 300), 
-        y: this.game.world.centerY + Utils.randomBetween(-300, 300)
-      })
+        x: Utils.fluff(this.game.world.centerX, 300),
+        y: Utils.fluff(this.game.world.centerY, 300)
+      }, Utils.randomBetween(20, 100))
   }
 
   randomPositionOffScreen() {
@@ -93,6 +93,8 @@ export class Game extends Phaser.State {
       Utils.delta(this.game, 1), 
       this.state.timers
     )
+    
+    this.state.entities = this.state.entities.filter(n => n.state.alive)
     this.state.timers = this.state.timers.filter(t => !t.done())
   }
 }

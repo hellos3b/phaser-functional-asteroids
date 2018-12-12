@@ -42,3 +42,15 @@ export const ifTrue = c_(
   (min, max) =>
     Math.floor(Math.random()*(max-min)) + min
 )
+
+/* 
+  fluff :: (Int, Int) -> Int
+  Takes a value, and adds a random +/- amount
+*/
+export const fluff = c_(
+  (value, amount) => value + randomBetween(amount*-1, amount)
+)
+
+export const toRadians = c_(
+  angle => angle * (Math.PI / 180)
+)

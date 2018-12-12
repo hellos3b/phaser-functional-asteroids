@@ -16,13 +16,26 @@ export class Splash extends Phaser.State {
     
     Object.keys(Sprites)
       .forEach( name => {
-        this.load.spritesheet(
+        const sprite = this.load.spritesheet(
           name,
           Sprites[name].path,
           Sprites[name].width,
           Sprites[name].height,
           Sprites[name].frames
         )
+
+        if (Sprites[name].animations) {
+          const animations = Sprites[name].animations
+          Object.keys(animations)
+            .forEach( animName => {
+              sprite.animations.add(
+                animName,
+                animations[animName].frames,
+                animations[animName].fps,
+                animations[animName].loop
+              )
+            })
+        }
       }) 
   }
 

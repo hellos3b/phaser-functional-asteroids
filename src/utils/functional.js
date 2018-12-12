@@ -79,7 +79,7 @@ const OldState = function (currentState, oldState) {
 }
 
 const isObject = (T) => 
-	(typeof T === 'object' && !(T instanceof Array))
+	(typeof T === 'object' && !(T instanceof Array) && T !== null)
 
 /*
     CleanState
@@ -127,6 +127,8 @@ export const State = function (initialState) {
 			return target[prop]
 		},
 		set(target, prop, value) {
+			if (target[prop] === value) return true
+
 			dirty.add(prop)
 			// We only want the first value, so we check if undefined so we don't re-write it
 			// if it gets changed a second time
