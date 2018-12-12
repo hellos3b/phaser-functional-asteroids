@@ -20,7 +20,7 @@ const settersMap = {
   getObjectKeys :: (Object, [String]) -> [Any]
   Returns an array of 
 */
-const getObjectKeys = c_(
+const filterObject = c_(
   (obj, keys) => 
     keys.map( key => obj[key])
       .filter( key => !!key)
@@ -44,7 +44,7 @@ export class Sprite extends Phaser.Sprite {
 
   setState(state, keys) {
     pipe(
-      () => getObjectKeys(settersMap, keys || state.$dirty),
+      () => filterObject(settersMap, keys || state.$dirty),
       pushSpriteUpdate(this, state)
     )()
   }
