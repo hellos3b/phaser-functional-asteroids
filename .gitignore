@@ -7,4 +7,5 @@ dist/
 *.log
 /index.html
 build/
-assets_src/
+
+assets_src

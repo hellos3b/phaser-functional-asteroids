@@ -1,5 +1,11 @@
+const path = require("path")
+
 const HtmlWebPackPlugin = require("html-webpack-plugin")
 const MiniCssExtractPlugin = require("mini-css-extract-plugin")
+const CopyWebpackPlugin = require("copy-webpack-plugin")
+
+const __root = path.join(__dirname, '..')
+const phaserModule = path.join(__root, 'node_modules/phaser-ce/')
 
 const jsLoader = {
   test: /\.js$/,
@@ -28,6 +34,41 @@ const cssLoader = {
   ]
 }
 
+// Expose PIXI and p2 so Phaser can use them from window.
+const exposePhaser = {
+  test: /phaser-split\.js$/,
+  use: [{
+    loader: 'expose-loader',
+    options: 'Phaser'
+  }]    
+}
+const exposePIXI = {
+  test: /pixi\.js$/,
+  use: [{
+    loader: 'expose-loader',
+    options: 'PIXI'
+  }]    
+}
+
+const exposeP2 = {
+  test: /p2\.js$/,
+  use: [{
+    loader: 'expose-loader',
+    options: 'p2'
+  }]    
+}
+
+const fontLoader = {
+  test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+  use: [{
+    loader: 'file-loader',
+    options: {
+        name: '[name].[ext]',
+        outputPath: 'fonts/'
+    }
+}]
+}
+
 const htmlPlugin = new HtmlWebPackPlugin({
   template: "./src/index.html",
   filename: "./index.html"
@@ -38,16 +79,34 @@ const cssPlugin = new MiniCssExtractPlugin({
   chunkFilename: "[id].css"
 })
 
+const copyAssets = new CopyWebpackPlugin([ 
+  {from: 'assets', to: 'assets' }
+])
+
 module.exports = {
+
   module: {
     rules: [
       jsLoader,
       htmlLoader,
-      cssLoader
+      cssLoader,
+      exposePhaser,
+      exposePIXI,
+      exposeP2,
+      fontLoader
     ]
   },
   plugins: [
     htmlPlugin,
-    cssPlugin
-  ]
+    cssPlugin,
+    copyAssets
+  ],
+  resolve: {
+    alias: {
+      'phaser': path.join(phaserModule, 'build/custom/phaser-split.js'),
+      'pixi': path.join(phaserModule, 'build/custom/pixi.js'),
+      'p2': path.join(phaserModule, 'build/custom/p2.js'),
+      '@': path.join(__root, 'src')
+    }
+  }
 }
