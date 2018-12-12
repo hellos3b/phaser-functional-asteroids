@@ -18,16 +18,22 @@ const settersMap = {
 
 /* 
   getObjectKeys :: (Object, [String]) -> [Any]
-  Returns an object with the keys, but only if they exist
+  Returns an array of 
 */
-const filterObjectKeys = c_(
+const getObjectKeys = c_(
   (obj, keys) => 
     keys.map( key => obj[key])
       .filter( key => !!key)
 )
 
+const filter = c_(
+  (expression, collection) => collection.filter(expression)
+)
+
+const filterNull = filter(n => !!n)
+
 /* 
-  spriteUpdate :: (Phaser.Sprite, State, Object(key->Function)) -> null
+  spriteUpdate :: (Phaser.Sprite, State, [Function]) -> null
   Updates the sprite with all the setters to their new values
 */
 const pushSpriteUpdate = c_((sprite, state, setters) => 
@@ -43,9 +49,9 @@ export class Sprite extends Phaser.Sprite {
   }
 
   setState(state, keys) {
-    // If no specific keys provided, only update the dirty values
     pipe(
-      () => filterObjectKeys(settersMap, keys || state.$dirty),
+      () => getObjectKeys(settersMap, keys || state.$dirty),
+      filterNull,
       pushSpriteUpdate(this, state)
     )()
   }
