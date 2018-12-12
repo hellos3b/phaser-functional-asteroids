@@ -3,15 +3,15 @@ import { c_ } from "@/utils/functional"
 import { pipe } from "../utils/functional";
 
 // Holds a mapping to set state values to sprite values
-const settersMap = {
-  position: c_((sprite, state) => {
+const modifiers = {
+  setPosition: c_((sprite, state) => {
     sprite.x = state.position.x
     sprite.y = state.position.y
   }),
-  frame: c_((sprite, state) => {
+  setFrame: c_((sprite, state) => {
     sprite.frame = state.frame
   }),
-  anchor: c_((sprite, state) => {
+  setAnchor: c_((sprite, state) => {
     sprite.anchor.setTo(state.anchor.x, state.anchor.y)
   })
 }
@@ -30,9 +30,21 @@ const filterObject = c_(
   spriteUpdate :: (Phaser.Sprite, State, [Function]) -> null
   Updates the sprite with all the setters to their new values
 */
-const pushSpriteUpdate = c_((sprite, state, setters) => 
-  setters.forEach( s => s(sprite, state) )
+const pushSpriteUpdate = c_(
+  (sprite, state, setters) => setters.forEach( s => s(sprite, state) )
 )
+
+/* 
+  prefixPropertyName :: [String] -> [String]
+  Converts property name to a set function name, i.e. position -> setPosition
+*/
+const prefixPropertyNames = c_(
+  strings => strings
+    .map( str => 
+      "set" + str.charAt(0).toUpperCase() + str.substring(1)
+    )
+)
+
 
 export class Sprite extends Phaser.Sprite {
 
@@ -44,7 +56,8 @@ export class Sprite extends Phaser.Sprite {
 
   setState(state, keys) {
     pipe(
-      () => filterObject(settersMap, keys || state.$dirty),
+      () => prefixPropertyNames(keys || state.$dirty),
+      filterObject(modifiers),
       pushSpriteUpdate(this, state)
     )()
   }
