@@ -2,6 +2,8 @@
     Stolen from a github gist
     https://gist.github.com/Dalimil/3daf2a0c531d7d030deb37a7bfeff454
 */
+import * as Utils from '@/utils'
+
 function Vector2(x, y) {
 	this.x = (x === undefined) ? 0 : x;
 	this.y = (y === undefined) ? 0 : y;
@@ -115,4 +117,9 @@ export const directionTowards = c_(
 	(position, target) =>
 		new Vector2(target.x, target.y)
 			.subtract(new Vector2(position.x, position.y))
+)
+
+export const fromAngle = c_(
+    angle => new Vector2(0, 1)
+            .rotate(Utils.toRadians(angle))
 )

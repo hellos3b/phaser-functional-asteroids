@@ -4,7 +4,7 @@ import { c_, State, pipe } from '@/utils/functional'
 import * as Utils from '@/utils'
 import * as Physics from '@/core/Physics'
 import * as Input from '@/core/Input'
-import { Vector2 } from '../utils/Vector2';
+import * as Vector2 from '@/utils/Vector2';
 
 const defaultState = {
 	// state props
@@ -58,10 +58,10 @@ export class Spaceship {
 
 	update() {
 		this.input.stream(pipe(
-			Input.keyDown(Input.Keys.Thrust, 			() => this.boost()),
-			Input.onKeyUp(Input.Keys.Thrust, 			() => this.stopBoost()),
+			Input.keyDown(Input.Keys.Thrust, () => this.boost()),
+			Input.onKeyUp(Input.Keys.Thrust, () => this.stopBoost()),
 			Input.keyDown(Input.Keys.RotateRight, () => this.rotate(1)),
-			Input.keyDown(Input.Keys.RotateLeft, 	() => this.rotate(-1))
+			Input.keyDown(Input.Keys.RotateLeft, () => this.rotate(-1))
 		))
 		this.updatePhysics()
 		this.sprite.setState(this.state)
@@ -77,16 +77,16 @@ export class Spaceship {
 	}
 
 	rotate(dir) {
-		this.state.angle += Utils.delta(this.game, dir * this.state.rotateSpeed)
+    Physics.rotate(this.state, Utils.delta(this.game, 1), dir * this.state.rotateSpeed)
 	}
 
 	boost() {
-		const direction = new Vector2(0, 1)
-			.rotate(Utils.toRadians(this.state.angle))
-		this.state.velocity = {
-			x: this.state.velocity.x - Utils.delta(this.game, this.state.boost * direction.x),
-			y: this.state.velocity.y - Utils.delta(this.game, this.state.boost * direction.y)
-		}
+    pipe(
+      () => Vector2.fromAngle(this.state.angle),
+      velocity => velocity.multiply(this.state.boost),
+      Physics.addVelocity(this.state, Utils.delta(this.game, 1))
+    )(this.state)
+
 		this.state.animation = "boost"
 	}
 
