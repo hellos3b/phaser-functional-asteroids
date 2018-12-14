@@ -31,6 +31,10 @@ export const randomBetween = c_(
     Math.floor(Math.random()*(max-min)) + min
 )
 
+export const map = c_(
+  (fn, arr) => arr.map(fn)
+)
+
 export const timerReady = c_(
   (currentTime, limit) => currentTime >= limit
 )
@@ -53,4 +57,20 @@ export const fluff = c_(
 
 export const toRadians = c_(
   angle => angle * (Math.PI / 180)
+)
+
+/*
+  numberCommas :: Int -> String
+*/
+export const numberCommas = c_(
+  num => Number(num).toLocaleString()
+)
+
+export const reduceToObject = c_(
+  (setTo) =>
+    (res, val) => {
+      if (!res) res = {}
+      res[val] = setTo
+      return 
+    }
 )

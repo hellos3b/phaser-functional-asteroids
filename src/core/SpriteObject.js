@@ -10,6 +10,7 @@ export class SpriteObject extends Phaser.Sprite {
   constructor (game, state) {
     super(game, state.position.x, state.position.y, state.asset)
 
+    this.game = game
     this.setState(state, Object.keys(state))
   }
 

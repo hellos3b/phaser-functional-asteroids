@@ -6,6 +6,12 @@ import * as Physics from '@/core/Physics'
 
 const defaultState = {
     alive: true,
+
+    physics: true,
+    bodyRadius: 8,
+    collisionGroup: Physics.CollisionGroups.Asteroid,
+    collisionTargets: [],
+
     position: {
         x: 100,
         y: 100
@@ -30,6 +36,8 @@ export class Asteroid {
             ...defaultState,
             ...opt
         })
+
+        console.log("Asteroid!", this.state)
 
         this.sprite = new SpriteObject(game, this.state)
     }

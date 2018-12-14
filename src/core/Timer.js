@@ -5,9 +5,10 @@ export const Timer = function(limit, stream, looping=false) {
         time += timePassed
         if (this.done()) {
             stream()
-        }
-        if (looping) {
-            this.reset()
+
+            if (looping) {
+                this.reset()
+            }
         }
         return this
     }

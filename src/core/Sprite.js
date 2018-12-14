@@ -3,30 +3,43 @@ import { c_, Maybe } from '@/utils/functional'
 // The only place where sprite values should be modified
 export const modifiers = {
 
-	setPosition: c_((sprite, state) => {
-		sprite.x = state.position.x
-		sprite.y = state.position.y
+	setPosition: c_((sprite, { position }) => {
+		sprite.x = position.x
+		sprite.y = position.y
 	}),
 
 	setFrame: c_((sprite, state) => {
 		sprite.frame = state.frame
 	}),
 
-	setAnchor: c_((sprite, state) => {
-		sprite.anchor.setTo(state.anchor.x, state.anchor.y)
+	setAnchor: c_((sprite, { anchor }) => {
+		sprite.anchor.setTo(anchor.x, anchor.y)
 	}),
 
-	setAnimation: c_((sprite, state) => {
-		if (state.animation) {
-			sprite.animations.play(state.animation)
+	setAnimation: c_((sprite, { frame, animation }) => {
+		if (animation) {
+			sprite.animations.play(animation)
 		} else {
 			sprite.animations.stop()
-			sprite.frame = state.frame
+			sprite.frame = frame
 		}
 	}),
 
-	setAngle: c_((sprite, state) => {
-		sprite.angle = state.angle
+	setAngle: c_((sprite, { angle }) => {
+		sprite.angle = angle
+	}),
+
+	setPhysics: c_((sprite, { physics }) => {
+		sprite.game.physics.arcade.enable(sprite)
+		sprite.enableBody = physics
+	}),
+
+	setBodyRadius: c_((sprite, { bodyRadius }) => {
+		sprite.body.setCircle(
+			bodyRadius,    
+			(-bodyRadius + 0.5 * sprite.width  / sprite.scale.x),
+			(-bodyRadius + 0.5 * sprite.height / sprite.scale.y)
+		)
 	})
 
 }
@@ -37,12 +50,12 @@ export const modifiers = {
 export const loadAnimations = c_(
 	(sprite, animations) => Object.keys(animations)
 		.forEach( name => {
-		sprite.animations.add(
-			name,
-			animations[name].frames,
-			animations[name].fps,
-			animations[name].loop
-		)
+			sprite.animations.add(
+				name,
+				animations[name].frames,
+				animations[name].fps,
+				animations[name].loop
+			)
 		})
 )
 

@@ -46,7 +46,7 @@ export const updateTimers = c_(
 */
 export const addToGroup = c_(
     (group, entity) => {
-        // todo: add groups
+        group.add(entity.sprite)
         return entity
     }
 )

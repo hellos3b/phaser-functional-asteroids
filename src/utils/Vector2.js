@@ -123,3 +123,13 @@ export const fromAngle = c_(
     angle => new Vector2(0, 1)
             .rotate(Utils.toRadians(angle))
 )
+
+export const multiply = c_(
+	(amount, v) => v.multiply(amount)
+)
+
+export const toTarget = c_(
+	(position, target) => 
+		directionTowards(position, target)
+        	.normalize()
+)
