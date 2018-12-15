@@ -8,131 +8,83 @@ import { State, pipe, stream, log } from '@/utils/functional'
 
 import { Asteroid } from '@/gameobjects/Asteroid'
 import * as Spaceship from '@/gameobjects/Spaceship'
-import * as Sprite from '@/core/Sprite'
+import * as Entity from '@/models/Entity'
 import { InputStream, PlayerInput } from '@/core/Input'
 import * as Boost from '@/gameobjects/Boost'
 import * as EventManager from '@/core/Events'
 
 import * as config from '@/config/game'
 import * as Physics from '@/core/Physics'
-import * as Vector2 from '@/utils/Vector2'
-import * as Debug from '@/core/Debug'
-
-const initialState = () => ({
-  config: {
-    lastAsteroidSpawn : 0,
-    asteroidSpawnRate : 0.15,
-    physicsStep       : 30 / 1000
-  },
-  state: {
-    bonus       : 0,
-    elapsedTime : 1
-  },
-  gameObjects : [],
-  spawnObjects: [],
-  timers      : []
-})
+import * as GameState from '@/models/GameState'
 
 /*
-  nextState :: (Phaser.State, State) -> State
+  nextState :: (Phaser.State, GameState) -> GameState
 */
 const nextState = (stage, state) => ({
     config: state.config,
     state: state.state,
     gameObjects: _.concat(
-      updateEntities(stage, state.gameObjects),
-      state.spawnObjects
+      updateEntities(stage)(state.gameObjects),
+      state.spawnQueue
     ),
-    spawnObjects: [],
+    spawnQueue: [],
     timers: []
 })
 
 /*
   updateObject :: Phaser.State -> Entity -> Entity
 */
-const updateEntity = stage => entity => 
-  pipe(
-    _.no("spriteId")(Stage.spawnNew(stage)),
-    _.has("physicsEnabled")(Physics.apply(_.delta(stage.game))),
-    _.has("input")(e => e.input(e)),
-    concatSpriteEvents(stage.sprites),
-    _.length("emit")(EventManager.emit),
-    commitToSprite(stage.sprites)
-  )(entity)
-
-/*
-  commitToSprite :: ([Sprite], Entity) => Object
-*/
-const concatSpriteEvents = c_(
-  (sprites, obj) => _.merge(obj, {
-    emit: _.concat(
-      sprites[obj.spriteId].emit || [],
-      obj.emit || []
-    )
-  })
+const updateEntity = stage => pipe(
+  _.no("sprite")(Stage.spawn(stage)),
+  _.has("physicsEnabled")(Physics.apply(_.delta(stage.game))),
+  _.has("input")(e => e.input(e)),
+  concatSpriteEvents,
+  _.length("emit")(EventManager.emit),
+  commitToSprite
 )
 
 /*
-  updateObjects :: (Phaser.State, [Entity]) -> [Entity]
+  commitToSprite :: Entity -> Entity
 */
-const updateEntities = (stage, entities) => 
-  pipe(
-    _.map(updateEntity(stage)),
-    _.filter(Sprite.dead),
-  )(entities)
+const concatSpriteEvents = obj => 
+  _.merge(obj, {
+      emit: _.concat(
+        obj.sprite.emit || [],
+        obj.emit || []
+      )
+    })
 
 /*
-  commitToSprite :: ([Sprite], Entity) => Object
+  updateObjects :: Phaser.State -> [Entity] -> [Entity]
 */
-const commitToSprite = c_(
-  (sprites, obj) => {
-    sprites[obj.spriteId].commit(obj)
-    return obj
-  }
+const updateEntities = stage => pipe(
+  _.map(updateEntity(stage)),
+  _.filter(Entity.dead)
 )
 
-// todo: maybe move to Spaceship ?
 /*
-  playerEvents :: () -> Object(string, function) -> Entity
+  commitToSprite :: Entity => Entity
 */
-const PlayerEvents = () => ({
-  [Spaceship.Events.Boost]: (stage, entity) => {
-    Stage.addObject(stage, Boost.create(stage, entity))
-    stage.game.camera.shake(0.01, 60)
-    return entity
-  }
-})
+const commitToSprite = obj => obj.sprite.commit(obj)
 
 /*
-  Initialize references (can't go without 'em)
+  Initialize references 
 */
 const init = (stage, options) => {
-  stage.sprites = {}
-  stage.state = new State(_.merge(initialState(), options))
-  stage.groups = new Groups(stage.game, [
-    "default",
-    ...Object.values(Physics.CollisionGroups)
-  ])
+  stage.state = new State(GameState.model(options))
+  stage.groups = new Groups(
+    stage.game, 
+    _.concat(["default"], Object.values(Physics.CollisionGroups))
+  )
   stage.input = new InputStream()
-  window.sg = stage
+  window.sg = stage //debug
 }
 
-// todo: move player json to Spaceship? (similar to boost)
 /*
   Create the player and start the game timers
 */
-const create = (stage, state) => {
-  let { gameObjects } = state
-
-  const player = _.merge(Spaceship.Entity(), {
-     position: Stage.centerPosition(stage.world),
-     input: PlayerInput(stage),
-     events: EventManager.Events(stage, PlayerEvents())
-  })
-
-  gameObjects = _.push(gameObjects, player)
-  state.$commit({ gameObjects })
-}
+const create = stage => 
+  Stage.addEntity(stage, Spaceship.create(stage))
 
 /*
   Get next state and commit
@@ -142,8 +94,9 @@ const update = (stage, state) => {
   stage.input.clear()
 }
 
+// Need to use function instead of arrows so we don't scope it to window lol
 export const Game = { 
-  init    : function (options={}) { init(this, options) }, 
+  init    : function(options={}) { init(this, options) }, 
   create  : function() { create(this, this.state) }, 
   update  : function() { update(this, this.state) }
 }

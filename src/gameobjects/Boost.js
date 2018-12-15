@@ -1,6 +1,5 @@
-import { SpriteObject } from '@/core/SpriteObject'
-import { die } from '@/core/Sprite'
-import { State, pipe } from '@/utils/functional'
+import * as Entity from '@/models/Entity'
+import { pipe } from '@/utils/functional'
 import * as _ from '@/utils'
 import * as V2 from '@/utils/Vector2'
 import * as EventManager from '@/core/Events'
@@ -9,7 +8,7 @@ export const Events = {
 	onDone: "boost"
 }
 
-export const Entity = () => ({
+export const Create = () => Entity.model({
 	alive: true,
 	group: "default",
 	position: {
@@ -34,46 +33,30 @@ export const Entity = () => ({
 
 const SPAWN_OFFSET = 16
 
+/*
+	getPosition :: Spaceship -> Object
+*/
 export const getPosition = spaceship => pipe(
 		V2.fromAngle,
 		V2.multiply(SPAWN_OFFSET),
 		V2.add(spaceship.position)
 	)(spaceship.angle)
 
+/*
+	BoostEvents :: () -> Map(String, Function)
+*/
 const BoostEvents = () => ({
-	[Events.onDone]: (stage, entity) => die(entity)
+	[Events.onDone]: (stage, entity) => Entity.die(entity)
 })
 
+/*
+	create :: (Phaser.State, Spaceship) -> Boost
+*/
 export const create = c_(
 	(stage, target) => 
 		_.merge(
-			Entity(), {
+			Create(), {
         position: getPosition(target),
         events: EventManager.Events(stage, BoostEvents())
       })
 )
-
-// export class Boost {
-
-// 	constructor(game, opt) {
-// 		this.game = game
-// 		this.state = new State({
-// 			...defaultState,
-// 			...opt
-// 		})
-
-// 		this.sprite = new SpriteObject(game, this.state)
-
-// 		this.sprite.animations.currentAnim.onComplete.add(() => this.die())
-// 	}
-
-// 	update() {
-// 		this.sprite.setState(this.state)
-// 		this.state.$clean()		
-// 	}
-
-// 	die() {
-// 		this.sprite.destroy()
-// 		this.state.alive = false
-// 	}
-// }

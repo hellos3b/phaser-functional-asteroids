@@ -54,7 +54,7 @@ export class Asteroid {
         const { state } = this
         const delta = Utils.delta(this.game, 1)
 
-        Physics.applyVelocity(delta, state)
+        // Physics.applyVelocity(delta, state)
         Physics.rotate(state, delta, state.rotateSpeed)
     }
 

@@ -3,15 +3,14 @@ import {SpriteObject} from '@/core/SpriteObject'
 import * as _ from '../utils'
 
 /* 
-  createSprite :: (Phaser.Game, Object) -> SpriteObject
+  createSprite :: (Phaser.Game, Entity) -> Sprite
 */
 export const createSprite = c_(
-	(game, props) => new SpriteObject(game, props)
+	(game, entity) => new SpriteObject(game, entity)
 )
 
 /* 
-  addToScene :: (Phaser.Game, GameObject) -> GameObject
-  Adds a GameObject to the stage
+  addToScene :: (Phaser.Game, Sprite) -> Sprite
 */
 export const addToScene = c_(
 	(game, sprite) => {
@@ -21,7 +20,7 @@ export const addToScene = c_(
 )
 
 /* 
-  updateEntities :: [Entity] -> null
+  updateEntities :: [Entity] -> [Entity]
 */
 export const updateEntities = entities =>
 	entities.map(
@@ -41,7 +40,7 @@ export const updateTimers = c_(
 )
 
 /* 
-  addToGroup :: (Group, SpriteObject) -> SpriteObject
+  addToGroup :: (Phaser.State, Sprite) -> Sprite
 */
 export const addToGroup = c_(
 	(stage, sprite) => {
@@ -54,38 +53,40 @@ export const addToGroup = c_(
 	}
 )
 
+/* 
+  spawn :: (Phaser.State, Entity) -> Entity
+*/
 export const spawn = c_(
-	(stage, props) =>
-	pipe(
-		createSprite(stage.game),
-		addToScene(stage.game),
-		addToGroup(stage)
-	)(props)
-)
+	(stage, entity) => {
+		const sprite = pipe(
+			createSprite(stage.game),
+			addToScene(stage.game),
+			addToGroup(stage)
+		)(entity)
 
-export const spawnNew = c_(
-	(stage, props) => {
-		console.log("spawn new")
-		const sprite = spawn(stage, props)
-		stage.sprites[sprite.id] = sprite
-		props.spriteId = sprite.id
-		return props
+		return _.merge(entity, { sprite })
 	}
 )
 
+/* 
+  centerPosition :: Phaser.World -> Object
+*/
 export const centerPosition = world => ({
 	x: world.centerX,
 	y: world.centerY
 })
 
-export const addObject = c_(
-	(stage, obj) => {
-		const spawnObjects = _.push(
-			stage.state.spawnObjects,
-			obj
+/* 
+  addEntity :: (Phaser.State, Entity) -> Entity
+*/
+export const addEntity = c_(
+	(stage, entity) => {
+		const spawnQueue = _.push(
+			stage.state.spawnQueue,
+			entity
 		)	
 
-		stage.state.$commit({ spawnObjects })
-		return obj
+		stage.state.$commit({ spawnQueue })
+		return entity
 	}
 )

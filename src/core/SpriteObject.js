@@ -40,12 +40,14 @@ const commits = {
 		sprite.angle = angle
 	}),
 
-	setBodyRadius: c_((sprite, { bodyRadius }) => {
-		sprite.body.setCircle(
-			bodyRadius,    
-			(-bodyRadius + 0.5 * sprite.width  / sprite.scale.x),
-			(-bodyRadius + 0.5 * sprite.height / sprite.scale.y)
-		)
+	setBodyRadius: c_((sprite, { physicsEnabled, bodyRadius }) => {
+    if (physicsEnabled) {
+      sprite.body.setCircle(
+        bodyRadius,    
+        (-bodyRadius + 0.5 * sprite.width  / sprite.scale.x),
+        (-bodyRadius + 0.5 * sprite.height / sprite.scale.y)
+      )
+    }
 	})
 
 }
@@ -155,5 +157,6 @@ export class SpriteObject extends Phaser.Sprite {
     keys = keys || this.state.$dirty
     keys.forEach( k => updateProperty(this, this.state, k) )
     this.state.$clean()
+    return state
   }
 }

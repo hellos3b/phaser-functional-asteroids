@@ -3,6 +3,7 @@ const path = require("path")
 const HtmlWebPackPlugin = require("html-webpack-plugin")
 const MiniCssExtractPlugin = require("mini-css-extract-plugin")
 const CopyWebpackPlugin = require("copy-webpack-plugin")
+const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin
 
 const __root = path.join(__dirname, '..')
 const phaserModule = path.join(__root, 'node_modules/phaser-ce/')
@@ -100,7 +101,8 @@ module.exports = {
   plugins: [
     htmlPlugin,
     cssPlugin,
-    copyAssets
+    copyAssets,
+    new BundleAnalyzerPlugin()
   ],
   resolve: {
     alias: {

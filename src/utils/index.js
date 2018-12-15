@@ -2,7 +2,7 @@ import { Maybe, c_ } from './functional'
 
 /* 
   maybeProp :: (Object, String) -> Maybe(Any)
-  Returns an array of 
+  Returns the object's value wrapped in a Maybe
 */
 export const findInObject = c_(
 	(obj, key) => Maybe(obj[key])
@@ -25,12 +25,16 @@ export const merge = c_(
 
 /* 
   mergeIn :: (Object, Object) -> Object
-  For merging arg1 into arg2
+  Reversed args for merge
 */
 export const mergeIn = c_( 
   (obj1, obj2) => Object.assign(obj2, obj1)
 )
 
+/* 
+  length :: (String, Function, T) -> T
+  Will apply the function with T if T.length
+*/
 export const length = c_(
   (key, fn, obj) => Maybe(obj[key])
     .getOrElse([])
@@ -39,8 +43,14 @@ export const length = c_(
       : obj
 )
 
+/* 
+  id :: T -> T
+*/
 export const id = x => x
 
+/* 
+  deepMerge :: (Object, Object) -> Object
+*/
 export const deepMerge = c_(
   (target, source) => {
     // Iterate through `source` properties and if an `Object` set property to merge of `target` and `source` properties
@@ -54,9 +64,13 @@ export const deepMerge = c_(
   }
 )
 
+/* 
+  concat :: (Array, Array) -> Array
+*/
 export const concat = c_(
   (arr1, arr2) => arr1.concat(arr2)
 )
+
 /* 
   rnd :: (Int, Int) -> Int
 */
@@ -65,10 +79,16 @@ export const rnd = c_(
     Math.floor(Math.random()*(max-min)) + min
 )
 
+/* 
+  map :: (Function, Array) -> Array
+*/
 export const map = c_(
   (fn, arr) => arr.map(fn)
 )
 
+/* 
+  timerReady :: (Float, Float) -> Boolean
+*/
 export const timerReady = c_(
   (currentTime, limit) => currentTime >= limit
 )
@@ -81,17 +101,26 @@ export const fluff = c_(
   (value, amount) => value + randomBetween(amount*-1, amount)
 )
 
+/* 
+  toRadians :: Float -> Float
+  Takes a value, and adds a random +/- amount
+*/
 export const toRadians = c_(
   angle => angle * (Math.PI / 180)
 )
 
 /*
   numberCommas :: Int -> String
+  Turns a numer like 100000 to 100,000
 */
 export const numberCommas = c_(
   num => Number(num).toLocaleString()
 )
 
+/*
+  log :: (String, T) -> T
+  Good for logging in pipes
+*/
 export const log = c_(
   (msg, val) => {
     console.log(msg, val)
@@ -99,21 +128,40 @@ export const log = c_(
   }
 )
 
+/*
+  no :: (Key, Function, T) -> T
+  if T doesn't have 'key', call function and T
+*/
 export const no = c_(
   (key, fn, obj) => !obj[key] ? fn(obj) : obj
 )
 
+/*
+  has :: (Key, Function, T) -> T
+  if T has 'key', call function and T
+*/
 export const has = c_(
   (key, fn, obj) => !!obj[key] ? fn(obj) : obj
 )
 
+/*
+  filter :: (Function, Array) -> Array
+*/
 export const filter = c_(
   (fn, arr) => arr.filter(fn)
 )
 
+/*
+  flat :: Array -> Object
+  Should probably be called flat merge
+*/
 export const flat = arr =>
   arr.reduce( (res, cur) => merge(res, cur), {})
 
+/*
+  toObject :: (T, Array) -> Object[Array->T]
+  Converts an array into an object with default vaues
+*/
 export const toObject = c_(
   (val, keys) => keys.reduce( (res, n) => {
     res[n] = val
@@ -135,6 +183,10 @@ export const reduceDefaults = c_(
     }
 )
 
+/*
+  set :: (Object, String, T) -> T
+  Set a value on an object, returns value
+*/
 export const set = c_(
   (obj, key, val) => {
     obj[key] = val
@@ -142,17 +194,30 @@ export const set = c_(
   }
 )
 
+/*
+  each :: (Function, Array) -> Array
+*/
 export const each = c_(
   (fn, arr) => arr.forEach(fn)
 )
 
+/*
+  Model :: Object -> Object -> Object
+*/
+export const Model = (initial) => (obj) => Object.assign({}, initial, obj)
 
+/*
+  objMap :: (Function, Object) -> Object
+*/
 export const objMap = c_(
   (fn, obj) => Object
     .entries(obj)
     .map( ([key, value]) => fn(key, value))
 )
 
+/*
+  push :: (Array, Any) -> Array
+*/
 export const push = c_(
   (arr, val) => [...arr, val]
 )

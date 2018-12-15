@@ -1,8 +1,6 @@
-import * as _ from '@/utils'
+import * as _ from "@/utils"
 
-export const initialState = () => ({
-	spriteId: null,
-
+export const model = _.Model({
 	// entity prop
 	alive: true,
 	emit: [],
@@ -35,5 +33,12 @@ export const initialState = () => ({
 	angVelocity: 0
 })
 
+/*
+  die :: Entity -> Entity
+*/
 export const die = entity => _.merge(entity, { alive: false })
+
+/*
+  dead :: Entity -> Boolean
+*/
 export const dead = entity => entity.alive

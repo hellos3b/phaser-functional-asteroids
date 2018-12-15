@@ -1,16 +1,17 @@
 import * as _ from '@/utils'
 import * as Physics from '@/core/Physics'
-import {initialState} from '@/core/Sprite'
+import * as Entity from '@/models/Entity'
 import { pipe } from '@/utils/functional'
 import * as V2 from '@/utils/Vector2'
+import * as EventManager from '@/core/Events'
+import * as Stage from '@/core/Stage'
 
 export const Events = {
 	Boost: "boost"
 }
 
-export const Entity = () => _.deepMerge(
-	initialState(),
-	{
+export const Create = () => 
+	Entity.model({
 		state: {
 			thrustSpeed: 400,
 			rotateSpeed: 270,
@@ -40,6 +41,30 @@ export const Entity = () => _.deepMerge(
 		gravity: true
 	})
 
+/*
+  create :: Phaser.State -> Spaceship
+*/
+export const create = stage =>
+	_.merge(Create(), {
+		position : Stage.centerPosition(stage.world),
+		input    : PlayerInput(stage),
+		events   : EventManager.Events(stage, PlayerEvents())
+	})
+
+/*
+  playerEvents :: () -> Map(string, function) -> Entity
+*/
+const PlayerEvents = () => ({
+  [Events.Boost]: (stage, entity) => {
+    Stage.addEntity(stage, Boost.create(stage, entity))
+    stage.game.camera.shake(0.01, 60)
+    return entity
+  }
+})
+
+/*
+	Thrust :: Phaser.State -> Entity -> Entity
+*/
 export const Thrust = stage => entity => 
 	_.merge(entity, {
 		animation: "boost",
@@ -50,11 +75,17 @@ export const Thrust = stage => entity =>
 		)(entity.angle)
 	})
 
+/*
+	StopThrust :: Entity -> Entity
+*/
 export const StopThrust = entity => 
 	_.merge(entity, {
 		animation: null
 	})
 
+/*
+	Rotate :: (Phaser.State, Int, Entity) -> Entity
+*/
 export const Rotate = c_(
 	(stage, dir, entity) => 
 		_.merge(entity, {
@@ -62,6 +93,9 @@ export const Rotate = c_(
 		})
 )
 
+/*
+	Boost :: (Phaser.State, Entity) -> Entity
+*/
 export const Boost = stage => entity => 
 		_.merge(entity, {
 			velocity: pipe(
