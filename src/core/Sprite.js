@@ -1,3 +1,5 @@
+import * as _ from '@/utils'
+
 export const initialState = () => ({
 	spriteId: null,
 
@@ -33,4 +35,5 @@ export const initialState = () => ({
 	angVelocity: 0
 })
 
+export const die = entity => _.merge(entity, { alive: false })
 export const dead = entity => entity.alive

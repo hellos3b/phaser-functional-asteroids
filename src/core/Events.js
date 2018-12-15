@@ -10,10 +10,12 @@ export const Events = c_(
 )
 
 const fireEvent = c_(
-  (entity, event) =>
-    entity.events 
+  (entity, event) =>  {
+    console.log("fireEvent", entity, event)
+    return entity.events 
       ? _.merge(entity, entity.events.call(null, entity, event))
       : entity
+  }
 )
 
 /*
@@ -22,17 +24,9 @@ const fireEvent = c_(
 */
 export const emit = entity => 
   pipe(
-    _.map(fireEvent),
+    _.map(fireEvent(entity)),
     _.flat,
-    _.merge({emit: []}),
-    _.merge(entity)
+    _.merge(entity),
+    _.mergeIn({emit: []}),
+    _.log("entity emit")
   )(entity.emit)
-
-
-  const updateEntity = stage => entity => 
-  pipe(
-    _.no("spriteId")(Stage.spawnNew(stage)),
-    _.has("physicsEnabled")(Physics.apply(_.delta(stage.game))),
-    _.has("input")(e => e.input(e)),
-    _.length("emit")(Events.emit)
-  )(entity)

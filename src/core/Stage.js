@@ -1,6 +1,6 @@
 import {c_,pipe} from '@/utils/functional'
 import {SpriteObject} from '@/core/SpriteObject'
-import * as Utils from '../utils'
+import * as _ from '../utils'
 
 /* 
   createSprite :: (Phaser.Game, Object) -> SpriteObject
@@ -77,3 +77,15 @@ export const centerPosition = world => ({
 	x: world.centerX,
 	y: world.centerY
 })
+
+export const addObject = c_(
+	(stage, obj) => {
+		const spawnObjects = _.push(
+			stage.state.spawnObjects,
+			obj
+		)	
+
+		stage.state.$commit({ spawnObjects })
+		return obj
+	}
+)

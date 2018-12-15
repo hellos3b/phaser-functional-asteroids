@@ -23,6 +23,14 @@ export const merge = c_(
   (obj1, obj2) => Object.assign(obj1, obj2)
 )
 
+/* 
+  mergeIn :: (Object, Object) -> Object
+  For merging arg1 into arg2
+*/
+export const mergeIn = c_( 
+  (obj1, obj2) => Object.assign(obj2, obj1)
+)
+
 export const length = c_(
   (key, fn, obj) => Maybe(obj[key])
     .getOrElse([])
@@ -44,6 +52,10 @@ export const deepMerge = c_(
     Object.assign(target || {}, source)
     return target
   }
+)
+
+export const concat = c_(
+  (arr1, arr2) => arr1.concat(arr2)
 )
 /* 
   rnd :: (Int, Int) -> Int
@@ -133,6 +145,7 @@ export const set = c_(
 export const each = c_(
   (fn, arr) => arr.forEach(fn)
 )
+
 
 export const objMap = c_(
   (fn, obj) => Object

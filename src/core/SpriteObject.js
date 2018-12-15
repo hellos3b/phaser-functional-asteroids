@@ -22,18 +22,21 @@ const commits = {
 	}),
 
 	setAnimation: c_((sprite, { frame, animation }) => {
+    console.log("setAnimation", animation, sprite)
 		if (animation) {
 			sprite.animations.play(animation)
 		} else {
 			sprite.animations.stop()
 			sprite.frame = frame
 		}
-	}),
+  }),
 
-	setAnimations: c_((sprite, { animations }) => {
-		loadAnimations(sprite, animations)
-	}),
-
+  setAlive: c_((sprite, {alive}) => {
+    if (!alive) {
+      sprite.destroy()
+    }
+  }),
+  
 	setAngle: c_((sprite, { angle }) => {
 		sprite.angle = angle
 	}),
@@ -63,13 +66,20 @@ const loadAnimations = c_(
   loadAnimations :: (Phaser.Sprite, String, Object) -> null
 */
 const loadAnimation = c_(
-  (sprite, name, animation) =>
-    sprite.animations.add(
+  (sprite, name, animation) => {
+    const anim = sprite.animations.add(
       name,
       animation.frames,
       animation.fps,
       animation.loop
-    )
+    ) 
+
+    animation.onDone && anim.onComplete.add(() => emitEvent(sprite, animation.onDone))
+  }
+)
+
+const emitEvent = c_(
+  (sprite, event) => sprite.emit = _.push(sprite.emit, event)
 )
 
 /* 
@@ -117,6 +127,7 @@ export class SpriteObject extends Phaser.Sprite {
 
     this.id = spriteIds++
     this.game = game
+    this._emit = []
     const state = this.state = new State(props)
 
     // this is to prevent race conditions of other properties
@@ -130,9 +141,20 @@ export class SpriteObject extends Phaser.Sprite {
     this.commit(state, Object.keys(state))
   }
 
+  get emit() {
+    const emit = this._emit
+    this._emit = []
+    return emit
+  }
+
+  set emit(val) {
+    this._emit = val
+  }
+
   commit(state, keys) {
     this.state.$commit(state)
     keys = keys || this.state.$dirty
     keys.forEach( k => updateProperty(this, this.state, k) )
+    this.state.$clean()
   }
 }

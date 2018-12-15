@@ -85,6 +85,15 @@ const OldState = function (currentState, oldState) {
 const isObject = (T) => 
 	(typeof T === 'object' && !(T instanceof Array) && T !== null)
 
+const objEquals = c_(
+	(obj1, obj2) => {
+		for(var k in obj1) {
+			if (obj1[k] !== obj2[k]) return false
+		}
+		return true
+	}
+)
+
 /*
     CleanState
     Define a json object as a state, and whenever it changes set it to "dirty"
@@ -131,12 +140,14 @@ export const State = function (initialState) {
 				Object.entries(obj).map( 
 					([key, val]) => this.set(target, key, val) 
 				)
+				return target
 			}
 
 			return target[prop]
 		},
 		set(target, prop, value) {
 			if (target[prop] === value) return true
+			if (isObject(value) && objEquals(target[prop], value)) return true
 
 			dirty.add(prop)
 			// We only want the first value, so we check if undefined so we don't re-write it
