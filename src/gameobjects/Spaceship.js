@@ -4,7 +4,11 @@ import {initialState} from '@/core/Sprite'
 import { pipe } from '@/utils/functional'
 import * as V2 from '@/utils/Vector2'
 
-export const Spaceship = () => _.deepMerge(
+export const Events = {
+	Boost: "boost"
+}
+
+export const Entity = () => _.deepMerge(
 	initialState(),
 	{
 		state: {
@@ -65,5 +69,5 @@ export const Boost = stage => entity =>
 				V2.multiply(-entity.state.thrustSpeed * 25 * _.delta(stage.game)),
 				V2.add(entity.velocity)
 			)(entity.angle),
-			emit: _.push(entity.emit, "boost")
+			emit: _.push(entity.emit, Events.Boost)
 		})

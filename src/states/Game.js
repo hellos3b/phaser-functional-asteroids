@@ -7,11 +7,11 @@ import { Groups } from '@/core/Groups'
 import { State, pipe, stream, log } from '@/utils/functional'
 
 import { Asteroid } from '@/gameobjects/Asteroid'
-import { Spaceship } from '@/gameobjects/Spaceship'
+import * as Spaceship from '@/gameobjects/Spaceship'
 import * as Sprite from '@/core/Sprite'
 import { InputStream, PlayerInput } from '@/core/Input'
 import * as Boost from '@/gameobjects/Boost'
-import * as Events from '@/core/Events'
+import * as EventManager from '@/core/Events'
 
 import * as config from '@/config/game'
 import * as Physics from '@/core/Physics'
@@ -56,7 +56,7 @@ const updateEntity = stage => entity =>
     _.has("physicsEnabled")(Physics.apply(_.delta(stage.game))),
     _.has("input")(e => e.input(e)),
     concatSpriteEvents(stage.sprites),
-    _.length("emit")(Events.emit),
+    _.length("emit")(EventManager.emit),
     commitToSprite(stage.sprites)
   )(entity)
 
@@ -96,7 +96,7 @@ const commitToSprite = c_(
   playerEvents :: () -> Object(string, function) -> Entity
 */
 const PlayerEvents = () => ({
-  "boost": (stage, entity) => {
+  [Spaceship.Events.Boost]: (stage, entity) => {
     Stage.addObject(stage, Boost.create(stage, entity))
     stage.game.camera.shake(0.01, 60)
     return entity
@@ -124,10 +124,10 @@ const init = (stage, options) => {
 const create = (stage, state) => {
   let { gameObjects } = state
 
-  const player = _.merge(Spaceship(), {
+  const player = _.merge(Spaceship.Entity(), {
      position: Stage.centerPosition(stage.world),
      input: PlayerInput(stage),
-     events: Events.Events(stage, PlayerEvents())
+     events: EventManager.Events(stage, PlayerEvents())
   })
 
   gameObjects = _.push(gameObjects, player)

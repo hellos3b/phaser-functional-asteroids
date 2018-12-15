@@ -22,7 +22,6 @@ const commits = {
 	}),
 
 	setAnimation: c_((sprite, { frame, animation }) => {
-    console.log("setAnimation", animation, sprite)
 		if (animation) {
 			sprite.animations.play(animation)
 		} else {

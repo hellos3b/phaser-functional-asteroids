@@ -3,9 +3,13 @@ import { die } from '@/core/Sprite'
 import { State, pipe } from '@/utils/functional'
 import * as _ from '@/utils'
 import * as V2 from '@/utils/Vector2'
-import * as Events from '@/core/Events'
+import * as EventManager from '@/core/Events'
 
-export const defaultState = () => ({
+export const Events = {
+	onDone: "boost"
+}
+
+export const Entity = () => ({
 	alive: true,
 	group: "default",
 	position: {
@@ -22,7 +26,7 @@ export const defaultState = () => ({
 		play: {
 			frames: [6, 7, 8, 9],
 			fps: 20,
-			onDone: "done"
+			onDone: Events.onDone
 		}
 	},
 	animation: "play",
@@ -37,15 +41,15 @@ export const getPosition = spaceship => pipe(
 	)(spaceship.angle)
 
 const BoostEvents = () => ({
-	"done": (stage, entity) => die(entity)
+	[Events.onDone]: (stage, entity) => die(entity)
 })
 
 export const create = c_(
 	(stage, target) => 
 		_.merge(
-			defaultState(), {
+			Entity(), {
         position: getPosition(target),
-        events: Events.Events(stage, BoostEvents())
+        events: EventManager.Events(stage, BoostEvents())
       })
 )
 
