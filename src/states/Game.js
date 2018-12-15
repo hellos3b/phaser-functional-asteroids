@@ -8,7 +8,10 @@ import { State, pipe, stream, log } from '@/utils/functional'
 
 import { Asteroid } from '@/gameobjects/Asteroid'
 import { Spaceship } from '@/gameobjects/Spaceship'
+import * as Sprite from '@/core/Sprite'
+import { InputStream, PlayerInput } from '@/core/Input'
 import { Boost } from '@/gameobjects/Boost'
+import * as Events from '@/core/Events'
 
 import * as config from '@/config/game'
 import * as Physics from '@/core/Physics'
@@ -30,7 +33,7 @@ const initialState = () => ({
 })
 
 /*
-  nextState :: (Physics.State, State) -> State
+  nextState :: (Phaser.State, State) -> State
 */
 const nextState = (stage, state) => ({
     config: state.config,
@@ -40,19 +43,24 @@ const nextState = (stage, state) => ({
 })
 
 /*
-  updateObject :: Physics.State -> Entity -> Entity
+  updateObject :: Phaser.State -> Entity -> Entity
 */
 const updateEntity = stage => entity => 
   pipe(
     _.no("spriteId")(Stage.spawnNew(stage)),
-    _.has("physicsEnabled")(Physics.apply(_.delta(stage.game)))
+    _.has("physicsEnabled")(Physics.apply(_.delta(stage.game))),
+    _.has("input")(e => e.input(e)),
+    _.length("emit")(Events.emit)
   )(entity)
 
 /*
-  updateObjects :: (Physics.State, [Entity]) -> [Entity]
+  updateObjects :: (Phaser.State, [Entity]) -> [Entity]
 */
 const updateEntities = (stage, entities) => 
-  _.map(updateEntity(stage), entities) 
+  pipe(
+    _.map(updateEntity(stage)),
+    _.filter(Sprite.dead)
+  )(entities)
 
 /*
   commitToSprite :: ([Sprite], Entity) => null
@@ -60,6 +68,28 @@ const updateEntities = (stage, entities) =>
 const commitToSprite = c_(
   (sprites, obj) => sprites[obj.spriteId].commit(obj)
 )
+
+const BoostEvents = () => ({
+  "done": (stage, entity) => {
+    // todo: kill entity
+    // (i think its just Sprite.die(entity) )
+  }
+})
+
+const PlayerEvents = () => ({
+  "boost": (stage, entity) => {
+    // todo: implement
+    // stage.state.gameObjects = _.push(
+    //   gameObjects,
+    //   _.merge(Boost(), {
+    //     position: Stage.centerPosition(stage.world),
+    //     events: Events.Events(stage, PlayerEvents())
+    //  })
+    // )
+    return entity
+    console.log("PLAYER BOOST EVENT")
+  }
+})
 
 /*
   Initialize references (can't go without 'em)
@@ -71,6 +101,8 @@ const init = (stage, options) => {
     "default",
     ...Object.values(Physics.CollisionGroups)
   ])
+  stage.input = new InputStream()
+  window.sg = stage
 }
 
 /*
@@ -79,8 +111,10 @@ const init = (stage, options) => {
 const create = (stage, state) => {
   let { gameObjects } = state
 
-  const player = _.deepMerge(Spaceship(), {
-     position: Stage.centerPosition(stage.world)
+  const player = _.merge(Spaceship(), {
+     position: Stage.centerPosition(stage.world),
+     input: PlayerInput(stage),
+     events: Events.Events(stage, PlayerEvents())
   })
 
   gameObjects = _.push(gameObjects, player)
@@ -93,6 +127,7 @@ const create = (stage, state) => {
 const update = (stage, state) => {
   state.$commit(nextState(stage, state))
   _.each(commitToSprite(stage.sprites), state.gameObjects)
+  stage.input.clear()
 }
 
 export const Game = { 

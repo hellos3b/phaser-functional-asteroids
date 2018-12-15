@@ -3,6 +3,8 @@ export const initialState = () => ({
 
 	// entity prop
 	alive: true,
+	emit: [],
+	events: name,
 
 	asset: '',
 	frame: 0,
@@ -14,10 +16,6 @@ export const initialState = () => ({
 		x: 0.5,
 		y: 0.5
 	},
-	velocity: {
-		x: 0,
-		y: 0
-	},
 	animations: {},
 	animation: null,
 	angle: 0,
@@ -27,5 +25,12 @@ export const initialState = () => ({
 	bodyRadius: 8,
 	collisionGroup: -1,
 	collisionTargets: [],
-	gravity: false
+	gravity: false,
+	velocity: {
+		x: 0,
+		y: 0
+	},
+	angVelocity: 0
 })
+
+export const dead = entity => entity.alive

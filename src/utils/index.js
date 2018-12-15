@@ -23,6 +23,14 @@ export const merge = c_(
   (obj1, obj2) => Object.assign(obj1, obj2)
 )
 
+export const length = c_(
+  (key, fn, obj) => Maybe(obj[key])
+    .getOrElse([])
+    .length
+      ? fn(obj) 
+      : obj
+)
+
 export const id = x => x
 
 export const deepMerge = c_(
@@ -72,6 +80,13 @@ export const numberCommas = c_(
   num => Number(num).toLocaleString()
 )
 
+export const log = c_(
+  (msg, val) => {
+    console.log(msg, val)
+    return val
+  }
+)
+
 export const no = c_(
   (key, fn, obj) => !obj[key] ? fn(obj) : obj
 )
@@ -82,6 +97,16 @@ export const has = c_(
 
 export const filter = c_(
   (fn, arr) => arr.filter(fn)
+)
+
+export const flat = arr =>
+  arr.reduce( (res, cur) => merge(res, cur), {})
+
+export const toObject = c_(
+  (val, keys) => keys.reduce( (res, n) => {
+    res[n] = val
+    return res
+  }, {})
 )
 
 /*

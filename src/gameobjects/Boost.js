@@ -3,7 +3,7 @@ import { loadAnimations } from '@/core/Sprite'
 import { State } from '@/utils/functional'
 import * as _ from '@/utils'
 
-const defaultState = {
+export const Boost = {
 	position: {
 		x: 100,
 		y: 100
@@ -17,33 +17,34 @@ const defaultState = {
 	animations: {
 		play: {
 			frames: [6, 7, 8, 9],
-			fps: 20
+			fps: 20,
+			onDone: "done"
 		}
 	},
 	animation: "play",
 }
 
-export class Boost {
+// export class Boost {
 
-	constructor(game, opt) {
-		this.game = game
-		this.state = new State({
-			...defaultState,
-			...opt
-		})
+// 	constructor(game, opt) {
+// 		this.game = game
+// 		this.state = new State({
+// 			...defaultState,
+// 			...opt
+// 		})
 
-		this.sprite = new SpriteObject(game, this.state)
+// 		this.sprite = new SpriteObject(game, this.state)
 
-		this.sprite.animations.currentAnim.onComplete.add(() => this.die())
-	}
+// 		this.sprite.animations.currentAnim.onComplete.add(() => this.die())
+// 	}
 
-	update() {
-		this.sprite.setState(this.state)
-		this.state.$clean()		
-	}
+// 	update() {
+// 		this.sprite.setState(this.state)
+// 		this.state.$clean()		
+// 	}
 
-	die() {
-		this.sprite.destroy()
-		this.state.alive = false
-	}
-}
+// 	die() {
+// 		this.sprite.destroy()
+// 		this.state.alive = false
+// 	}
+// }
