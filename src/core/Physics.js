@@ -1,41 +1,67 @@
 import { Maybe, c_ } from '@/utils/functional'
-import { Vector2 } from '../utils/Vector2'
+import { Vector2, add } from '../utils/Vector2'
+import { pipe } from '../utils/functional'
+import * as _ from '@/utils'
 
-export const GRAVITY = -150
+export const GRAVITY = { x: 0, y: -150 }
 
-export const applyVelocity = c_(
-	(delta, state) => {
-		state.position = {
-			x: state.position.x + (state.velocity.x * delta),
-			y: state.position.y + (state.velocity.y * delta)
+export const apply = c_(
+	(delta, props) => 
+		pipe(
+			props.gravity ? incVelocity(GRAVITY, delta) : _.id,
+			updatePosition(delta),
+			rotate(delta)
+		)(props)
+)
+
+export const updatePosition = c_(
+	(delta, props) => {
+		props.position = {
+			x: props.position.x + (props.velocity.x * delta),
+			y: props.position.y + (props.velocity.y * delta)
 		}
-		return state
+		return props
 	}
 )
 
-export const applyGravity = c_(
-	(delta, state) => {
-		state.velocity = {
-			x: state.velocity.x,
-			y: state.velocity.y - (GRAVITY * delta)
+export const incVelocity = c_(
+	(v, delta, props) => {
+		const { velocity } = props
+		props.velocity = {
+			x: velocity.x - (v.x * delta),
+			y: velocity.y - (v.y * delta)
 		}
-		return state
+		return props
 	}
-)
-
-export const addVelocity = c_(
-	(state, delta, velocity) => ({
-		x: state.velocity.x - (velocity.x * delta),
-		y: state.velocity.y - (velocity.y * delta)
-	})
 )
 
 export const rotate = c_(
-	(state, delta, rotation) => {
-		state.angle += rotation * delta
+	(delta, props) => {
+		props.angle += props.angVelocity * delta
+		return props
 	}
 )
 
+
+// export const applyVelocity = c_(
+// 	(delta, state) => {
+// 		state.position = {
+// 			x: state.position.x + (state.velocity.x * delta),
+// 			y: state.position.y + (state.velocity.y * delta)
+// 		}
+// 		return state
+// 	}
+// )
+
+// export const applyGravity = c_(
+// 	(delta, state) => {
+// 		state.velocity = {
+// 			x: state.velocity.x,
+// 			y: state.velocity.y - (GRAVITY * delta)
+// 		}
+// 		return state
+// 	}
+// )
 export const CollisionGroups = {
 	Player: "player",
 	Asteroid: "asteroid"

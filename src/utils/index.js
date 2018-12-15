@@ -1,7 +1,7 @@
 import { Maybe, c_ } from './functional'
 
 /* 
-  findInObject :: (Object, String) -> Maybe(Any)
+  maybeProp :: (Object, String) -> Maybe(Any)
   Returns an array of 
 */
 export const findInObject = c_(
@@ -13,20 +13,34 @@ export const findInObject = c_(
   Multiplies a value by the game's delta
 */
 export const delta = c_( 
-  (game, value) => value ? value * game.time.physicsElapsed  : game.time.physicsElapsed
+  game =>  game.time.physicsElapsed
 )
 
 /* 
-  combineObject :: (Object, Object) -> Object
+  merge :: (Object, Object) -> Object
 */
-export const combineObject = c_( 
+export const merge = c_( 
   (obj1, obj2) => Object.assign(obj1, obj2)
 )
 
+export const id = x => x
+
+export const deepMerge = c_(
+  (target, source) => {
+    // Iterate through `source` properties and if an `Object` set property to merge of `target` and `source` properties
+    for (let key of Object.keys(source)) {
+      if (source[key] instanceof Object && key in target) Object.assign(source[key], merge(target[key], source[key]))
+    }
+  
+    // Join `target` and modified `source`
+    Object.assign(target || {}, source)
+    return target
+  }
+)
 /* 
-  randomBetween :: (Int, Int) -> Int
+  rnd :: (Int, Int) -> Int
 */
-export const randomBetween = c_(
+export const rnd = c_(
   (min, max) =>
     Math.floor(Math.random()*(max-min)) + min
 )
@@ -37,14 +51,6 @@ export const map = c_(
 
 export const timerReady = c_(
   (currentTime, limit) => currentTime >= limit
-)
-
-/* 
-  randomBetween :: (Int, Int) -> Int
-*/
-export const ifTrue = c_(
-  (min, max) =>
-    Math.floor(Math.random()*(max-min)) + min
 )
 
 /* 
@@ -66,11 +72,49 @@ export const numberCommas = c_(
   num => Number(num).toLocaleString()
 )
 
-export const reduceToObject = c_(
-  (setTo) =>
+export const no = c_(
+  (key, fn, obj) => !obj[key] ? fn(obj) : obj
+)
+
+export const has = c_(
+  (key, fn, obj) => !!obj[key] ? fn(obj) : obj
+)
+
+export const filter = c_(
+  (fn, arr) => arr.filter(fn)
+)
+
+/*
+  reduceDefaults :: Any -> Object, String(key) -> Object
+  Takes in a default value and an array, and creates
+  an object with the default value who's keys are the array
+*/
+export const reduceDefaults = c_(
+  defaultValue =>
     (res, val) => {
       if (!res) res = {}
-      res[val] = setTo
+      res[val] = defaultValue
       return 
     }
+)
+
+export const set = c_(
+  (obj, key, val) => {
+    obj[key] = val
+    return val
+  }
+)
+
+export const each = c_(
+  (fn, arr) => arr.forEach(fn)
+)
+
+export const objMap = c_(
+  (fn, obj) => Object
+    .entries(obj)
+    .map( ([key, value]) => fn(key, value))
+)
+
+export const push = c_(
+  (arr, val) => [...arr, val]
 )

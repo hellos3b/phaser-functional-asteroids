@@ -3,7 +3,8 @@ import { State, c_ } from "@/utils/functional"
 export const Keys = {
     Thrust: 87,
     RotateRight: 68,
-    RotateLeft: 65
+    RotateLeft: 65,
+    SuperThrust: 32
 }
 
 // keyDown :: (Int, Function, State) => State
@@ -18,6 +19,16 @@ export const keyDown = c_(
 export const onKeyUp = c_(
     (keyCode, callback, keysState) => {
         if (!keysState[keyCode] && keysState.$old[keyCode]) {
+            callback()
+        }
+        return keysState
+    }
+)
+
+// onKeyDown :: (Int, Function, State) => State
+export const onKeyDown = c_(
+    (keyCode, callback, keysState) => {
+        if (keysState[keyCode] && !keysState.$old[keyCode]) {
             callback()
         }
         return keysState

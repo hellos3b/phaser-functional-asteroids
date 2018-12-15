@@ -1,21 +1,35 @@
-export const Timer = function(limit, stream, looping=false) {
-    let time = 0
+import { Stream } from '@/utils/Stream'
 
-    this.add = (timePassed) => {
-        time += timePassed
+export class Timer extends Stream {
+    constructor(rate, loop=false) {
+        super()
+        this.time = 0
+        this.rate = rate
+        this.loop = loop
+    }
+
+    addTime(elapsedTime) {
+        this.time += elapsedTime
+
         if (this.done()) {
-            stream()
+            this.push(this)
 
-            if (looping) {
+            if (this.loop) {
                 this.reset()
             }
         }
         return this
     }
 
-    this.done = () => time >= limit
+    setTo(rate) {
+        this.rate = rate
+    }
 
-    this.reset = () => {
-        time = 0
+    done() {
+        return this.time >= this.rate
+    }
+
+    reset() {
+        this.time = 0
     }
 }

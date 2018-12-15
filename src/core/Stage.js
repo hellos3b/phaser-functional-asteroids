@@ -1,15 +1,12 @@
-import { c_, pipe } from '@/utils/functional'
-import { Asteroid } from '@/gameobjects/Asteroid'
+import {c_,pipe} from '@/utils/functional'
+import {SpriteObject} from '@/core/SpriteObject'
 import * as Utils from '../utils'
 
 /* 
-  createAsteroid :: (Phaser.Game, T<GameObject>, Object) -> Asteroid
+  createSprite :: (Phaser.Game, Object) -> SpriteObject
 */
-export const createObject = c_(
-    (state, T, options) => {
-        const obj = new T(state, options)
-        return obj
-    }
+export const createSprite = c_(
+	(game, props) => new SpriteObject(game, props)
 )
 
 /* 
@@ -17,36 +14,66 @@ export const createObject = c_(
   Adds a GameObject to the stage
 */
 export const addToScene = c_(
-    (game, gameobject) => {
-        game.add.existing(gameobject.sprite)
-        return gameobject
-    }
+	(game, sprite) => {
+		game.add.existing(sprite)
+		return sprite
+	}
 )
 
 /* 
   updateEntities :: [Entity] -> null
 */
-export const updateEntities = c_(
-    (entities) => entities.forEach(
-        entity => entity.update && entity.update()
-    )
-)
+export const updateEntities = entities =>
+	entities.map(
+		entity => {
+			entity.update && entity.update()
+			return entity
+		}
+	).filter(e => e.state.alive)
 
 /* 
   updateTimers :: (Number, [Timers]) -> [Timers]
 */
 export const updateTimers = c_(
-    (time, timers) => timers.map(
-        t => t.add(time)
-    ).filter(t => !t.done() )
+	(time, timers) => timers.map(
+		t => t.addTime(time)
+	).filter(t => !t.done())
 )
 
 /* 
-  addToGroup :: (Group, Entity) -> Gameobject
+  addToGroup :: (Group, SpriteObject) -> SpriteObject
 */
 export const addToGroup = c_(
-    (group, entity) => {
-        group.add(entity.sprite)
-        return entity
-    }
+	(stage, sprite) => {
+		const name = sprite.state.group ||
+			sprite.state.collisionGroup ||
+			"default"
+
+		stage.groups[name].add(sprite)
+		return sprite
+	}
 )
+
+export const spawn = c_(
+	(stage, props) =>
+	pipe(
+		createSprite(stage.game),
+		addToScene(stage.game),
+		addToGroup(stage)
+	)(props)
+)
+
+export const spawnNew = c_(
+	(stage, props) => {
+		console.log("spawn new")
+		const sprite = spawn(stage, props)
+		stage.sprites[sprite.id] = sprite
+		props.spriteId = sprite.id
+		return props
+	}
+)
+
+export const centerPosition = world => ({
+	x: world.centerX,
+	y: world.centerY
+})

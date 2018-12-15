@@ -16,12 +16,11 @@ class Game extends Phaser.Game {
 
     super(width, height, Phaser.CANVAS, 'content', null)
 
-    console.log("states", States)
     for (var k in States) {
       this.state.add(k, States[k], false)
     }
 
-    this.state.start('Boot')
+    this.state.start('Splash')
   }
 }
 

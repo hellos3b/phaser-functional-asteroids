@@ -1,81 +1,31 @@
-import { c_, Maybe } from '@/utils/functional'
+export const initialState = () => ({
+	spriteId: null,
 
-// The only place where sprite values should be modified
-export const modifiers = {
+	// entity prop
+	alive: true,
 
-	setPosition: c_((sprite, { position }) => {
-		sprite.x = position.x
-		sprite.y = position.y
-	}),
+	asset: '',
+	frame: 0,
+	position: {
+		x: 0,
+		y: 0
+	},
+	anchor: {
+		x: 0.5,
+		y: 0.5
+	},
+	velocity: {
+		x: 0,
+		y: 0
+	},
+	animations: {},
+	animation: null,
+	angle: 0,
 
-	setFrame: c_((sprite, state) => {
-		sprite.frame = state.frame
-	}),
-
-	setAnchor: c_((sprite, { anchor }) => {
-		sprite.anchor.setTo(anchor.x, anchor.y)
-	}),
-
-	setAnimation: c_((sprite, { frame, animation }) => {
-		if (animation) {
-			sprite.animations.play(animation)
-		} else {
-			sprite.animations.stop()
-			sprite.frame = frame
-		}
-	}),
-
-	setAngle: c_((sprite, { angle }) => {
-		sprite.angle = angle
-	}),
-
-	setPhysics: c_((sprite, { physics }) => {
-		sprite.game.physics.arcade.enable(sprite)
-		sprite.enableBody = physics
-	}),
-
-	setBodyRadius: c_((sprite, { bodyRadius }) => {
-		sprite.body.setCircle(
-			bodyRadius,    
-			(-bodyRadius + 0.5 * sprite.width  / sprite.scale.x),
-			(-bodyRadius + 0.5 * sprite.height / sprite.scale.y)
-		)
-	})
-
-}
-
-/* 
-  loadAnimations :: (Phaser.Sprite, Object) -> null
-*/
-export const loadAnimations = c_(
-	(sprite, animations) => Object.keys(animations)
-		.forEach( name => {
-			sprite.animations.add(
-				name,
-				animations[name].frames,
-				animations[name].fps,
-				animations[name].loop
-			)
-		})
-)
-
-/* 
-  commitSpriteUpdate :: (Phaser.Sprite, State, Maybe(Function)) -> null
-  Updates the sprite with all the setters to their new values
-*/
-export const commitSpriteUpdate = c_(
-	(sprite, state, modifier) =>
-		modifier
-			.getOrElse(() => {})
-			.call(null, sprite, state)
-)
-
-/* 
-  prefixPropertyName :: String -> String
-  Converts property name to a set function name, i.e. position -> setPosition
-*/
-export const prefixPropertyName = c_(
-	str => "set" +
-		str.charAt(0).toUpperCase() +
-		str.substring(1)
-)
+	// physics
+	physicsEnabled: false,
+	bodyRadius: 8,
+	collisionGroup: -1,
+	collisionTargets: [],
+	gravity: false
+})

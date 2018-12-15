@@ -133,3 +133,11 @@ export const toTarget = c_(
 		directionTowards(position, target)
         	.normalize()
 )
+
+export const normalize = c_(
+	(v) => v.normalize()
+)
+
+export const add = c_(
+	(v, v2) => new Vector2(v.x, v.y).add(v2)
+)

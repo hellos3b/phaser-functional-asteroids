@@ -1,4 +1,3 @@
-export * from './core/Boot'
-export * from './core/Splash'
+export * from './Splash'
 
-export * from './game/Game'
+export * from './Game'

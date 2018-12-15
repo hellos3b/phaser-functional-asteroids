@@ -19,17 +19,13 @@ export const Maybe = function(T) {
         fn(5)
         -- will pass in 5 to fn1, then pass the result to fn2, then pass that result to fn3, and return the value
 */
-export const pipe = function () {
-	const args = [...arguments]
+export const pipe = (f1, ...fns) => (...args) => {
+	return fns.reduce((res, fn) => fn(res), f1.apply(null,args))
+}
 
-	return function () {
-		const fn = args.shift()
-		if (!(typeof fn === 'function')) {
-			console.error("Pipe argument is not a function:", fn)
-		}
-		const initial = fn.apply(this, arguments)
-		return args.reduce((result, fn) => fn.call(this, result), initial)
-	}
+export const stream = function(stream, callback) {
+	if (!stream.subscribe) throw new Error("Trying to stream a non Streamable")
+	stream.subscribe(callback)
 }
 
 /*
@@ -59,6 +55,14 @@ export const c_ = function (fn) {
 
 	return given([]);
 }
+
+
+export const log = c_(
+	(str, val) => {
+		console.log(str, val)
+		return val
+	}
+)
 
 /*
     OldState
@@ -123,6 +127,11 @@ export const State = function (initialState) {
 				}
 			}
 			if (prop === "$old") return OldState(state, oldState)
+			if (prop === "$commit") return obj => {
+				Object.entries(obj).map( 
+					([key, val]) => this.set(target, key, val) 
+				)
+			}
 
 			return target[prop]
 		},
@@ -144,6 +153,12 @@ export const State = function (initialState) {
 
 	return new Proxy(state, handler)
 }
+
+export const Commit = c_(
+	(target, value) => {
+		target = value
+	}
+)
 
 
 // useful for debugging

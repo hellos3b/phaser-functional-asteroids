@@ -25,7 +25,8 @@ const defaultState = {
     velocity: {
         x: 0,
         y: 0
-    }
+    },
+    rotateSpeed: 0
 }
 
 export class Asteroid {
@@ -36,8 +37,6 @@ export class Asteroid {
             ...defaultState,
             ...opt
         })
-
-        console.log("Asteroid!", this.state)
 
         this.sprite = new SpriteObject(game, this.state)
     }
@@ -52,10 +51,11 @@ export class Asteroid {
     }
 
     updatePhysics() {
+        const { state } = this
         const delta = Utils.delta(this.game, 1)
-        pipe(
-            Physics.applyVelocity(delta)
-        )(this.state)
+
+        Physics.applyVelocity(delta, state)
+        Physics.rotate(state, delta, state.rotateSpeed)
     }
 
     outOfBounds() {
