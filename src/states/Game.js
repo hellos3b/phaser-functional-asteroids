@@ -61,6 +61,9 @@ const commitToSprite = c_(
   (sprites, obj) => sprites[obj.spriteId].commit(obj)
 )
 
+/*
+  Initialize references (can't go without 'em)
+*/
 const init = (stage, options) => {
   stage.sprites = {}
   stage.state = new State(_.merge(initialState(), options))
@@ -70,6 +73,9 @@ const init = (stage, options) => {
   ])
 }
 
+/*
+  Create the player and start the game timers
+*/
 const create = (stage, state) => {
   let { gameObjects } = state
 
@@ -81,9 +87,11 @@ const create = (stage, state) => {
   state.$commit({ gameObjects })
 }
 
+/*
+  Get next state and commit
+*/
 const update = (stage, state) => {
   state.$commit(nextState(stage, state))
-
   _.each(commitToSprite(stage.sprites), state.gameObjects)
 }
 
