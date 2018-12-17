@@ -75,12 +75,13 @@ const loadAnimation = c_(
       animation.loop
     ) 
 
+    // Animation events
     animation.onDone && anim.onComplete.add(() => emitEvent(sprite, animation.onDone))
   }
 )
 
 const emitEvent = c_(
-  (sprite, event) => sprite.emit = _.push(sprite.emit, event)
+  (sprite, event) => sprite.eventQueue = _.push(sprite.eventQueue, event)
 )
 
 /* 
@@ -104,12 +105,10 @@ const prefixPropertyName = str =>
 		str.substring(1)
 
 const updateProperty = c_(
-  (sprite, state, key) =>
-    pipe(
-      prefixPropertyName,
-      _.findInObject(commits),
-      commitSpriteUpdate(sprite, state)
-    )(key)
+  (sprite, state, key) => key
+    |> prefixPropertyName
+    |> _.findInObject(commits)
+    |> commitSpriteUpdate(sprite, state)
 )
 
 /*
@@ -128,7 +127,7 @@ export class SpriteObject extends Phaser.Sprite {
 
     this.id = spriteIds++
     this.game = game
-    this._emit = []
+    this.eventQueue = []
     const state = this.state = new State(props)
 
     // this is to prevent race conditions of other properties
@@ -142,14 +141,10 @@ export class SpriteObject extends Phaser.Sprite {
     this.commit(state, Object.keys(state))
   }
 
-  get emit() {
-    const emit = this._emit
-    this._emit = []
-    return emit
-  }
-
-  set emit(val) {
-    this._emit = val
+  getEventQueue() {
+    const eventQueue = this.eventQueue
+    this.eventQueue = []
+    return eventQueue
   }
 
   commit(state, keys) {

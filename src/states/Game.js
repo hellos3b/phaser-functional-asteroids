@@ -2,11 +2,11 @@
 import Phaser from 'phaser'
 import * as Stage from '@/core/Stage'
 import * as _ from '@/utils'
-import { Timer } from '@/core/Timer'
+import * as Timer from '@/models/Timer'
 import { Groups } from '@/core/Groups'
 import { State, pipe, stream, log } from '@/utils/functional'
 
-import { Asteroid } from '@/gameobjects/Asteroid'
+import * as Asteroid from '@/gameobjects/Asteroid'
 import * as Spaceship from '@/gameobjects/Spaceship'
 import * as Entity from '@/models/Entity'
 import { InputStream, PlayerInput } from '@/core/Input'
@@ -23,49 +23,51 @@ import * as GameState from '@/models/GameState'
 const nextState = (stage, state) => ({
     config: state.config,
     state: state.state,
-    gameObjects: _.concat(
-      updateEntities(stage)(state.gameObjects),
-      state.spawnQueue
-    ),
-    spawnQueue: [],
-    timers: []
+    timers: Timer.updateAll(stage)(state.timers),
+    gameObjects: state.state.paused 
+      ? state.gameObjects
+      : _.concat(
+        updateEntities(stage)(state.gameObjects),
+        state.spawnQueue
+      ),
+    spawnQueue: _.filter( n => !n.sprite, state.spawnQueue )
 })
+
+/*
+  updateObjects :: Phaser.State -> [Entity] -> [Entity]
+*/
+const updateEntities = c_(
+  (stage, entity) => entity
+    |> _.map(updateEntity(stage))
+    |> _.filter(Entity.dead)
+)
 
 /*
   updateObject :: Phaser.State -> Entity -> Entity
 */
-const updateEntity = stage => pipe(
-  _.no("sprite")(Stage.spawn(stage)),
-  _.has("physicsEnabled")(Physics.apply(_.delta(stage.game))),
-  _.has("input")(e => e.input(e)),
-  concatSpriteEvents,
-  _.length("emit")(EventManager.emit),
-  commitToSprite
+const updateEntity = c_(
+  (stage, entity) => entity
+    |> _.no("sprite") (Stage.spawn(stage))
+    |> _.has("physicsEnabled") (Physics.apply(_.delta(stage.game)))
+    |> _.has("update") (e => e.update(stage, e))
+    |> _.has("events") (fireSpriteEvents)
+    |> commitToSprite
 )
 
 /*
   commitToSprite :: Entity -> Entity
 */
-const concatSpriteEvents = obj => 
-  _.merge(obj, {
-      emit: _.concat(
-        obj.sprite.emit || [],
-        obj.emit || []
-      )
-    })
-
-/*
-  updateObjects :: Phaser.State -> [Entity] -> [Entity]
-*/
-const updateEntities = stage => pipe(
-  _.map(updateEntity(stage)),
-  _.filter(Entity.dead)
-)
+const fireSpriteEvents = entity => 
+  entity.sprite.getEventQueue()
+    |> _.map(entity.events(entity))
+    |> _.mergeDown
+    |> _.mergeIn(entity)
 
 /*
   commitToSprite :: Entity => Entity
 */
 const commitToSprite = obj => obj.sprite.commit(obj)
+
 
 /*
   Initialize references 
@@ -77,14 +79,27 @@ const init = (stage, options) => {
     _.concat(["default"], Object.values(Physics.CollisionGroups))
   )
   stage.input = new InputStream()
-  window.sg = stage //debug
+  window.sg = stage // * debug
 }
 
 /*
   Create the player and start the game timers
 */
-const create = stage => 
-  Stage.addEntity(stage, Spaceship.create(stage))
+const create = stage => {
+  Spaceship.create(stage) |> Stage.addEntity(stage)
+  stage.state.timers.push( 
+    _.merge(Timer.model(), {
+      count : () => 0.25,
+      loop  : true,
+      done  : () => Asteroid.create(stage, {}) |> Stage.addEntity(stage)
+    }))
+  stage.state.timers.push( 
+    _.merge(Timer.model(), {
+      count : () => 0.35,
+      loop  : true,
+      done  : () => Asteroid.create(stage, {}) |> Stage.addEntity(stage)
+    }))
+}
 
 /*
   Get next state and commit

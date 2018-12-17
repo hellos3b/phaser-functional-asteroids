@@ -1,10 +1,10 @@
 import * as _ from "@/utils"
+import { c_ } from "../utils/functional";
 
 export const model = _.Model({
 	// entity prop
 	alive: true,
-	emit: [],
-	events: name,
+	events: null,
 
 	asset: '',
 	frame: 0,
@@ -30,7 +30,10 @@ export const model = _.Model({
 		x: 0,
 		y: 0
 	},
-	angVelocity: 0
+	angVelocity: 0,
+
+	// methods
+	update: c_((stage, entity) => entity)
 })
 
 /*

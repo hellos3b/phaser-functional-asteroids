@@ -5,6 +5,8 @@ import { pipe } from '@/utils/functional'
 import * as V2 from '@/utils/Vector2'
 import * as EventManager from '@/core/Events'
 import * as Stage from '@/core/Stage'
+import {PlayerInput } from '@/core/Input'
+import * as BoostEntity from '@/gameobjects/Boost'
 
 export const Events = {
 	Boost: "boost"
@@ -38,8 +40,14 @@ export const Create = () =>
 		collisionTargets: [
 			Physics.CollisionGroups.Asteroid
 		],
-		gravity: true
+		gravity: true,
+
+		update
 	})
+
+const update = c_(
+	(stage, entity) => entity.input(entity)
+)
 
 /*
   create :: Phaser.State -> Spaceship
@@ -56,29 +64,27 @@ export const create = stage =>
 */
 const PlayerEvents = () => ({
   [Events.Boost]: (stage, entity) => {
-    Stage.addEntity(stage, Boost.create(stage, entity))
+    Stage.addEntity(stage, BoostEntity.create(stage, entity))
     stage.game.camera.shake(0.01, 60)
     return entity
   }
 })
 
 /*
-	Thrust :: Phaser.State -> Entity -> Entity
+	Accelerate :: Phaser.State -> Entity -> Entity
 */
-export const Thrust = stage => entity => 
+export const Accelerate = stage => entity => 
 	_.merge(entity, {
 		animation: "boost",
-		velocity: pipe(
-			V2.fromAngle,
-			V2.multiply(-entity.state.thrustSpeed * _.delta(stage.game)),
-			V2.add(entity.velocity)
-		)(entity.angle)
+		velocity: entity.angle |> V2.fromAngle
+			|> V2.multiply(-entity.state.thrustSpeed * _.delta(stage.game))
+			|> V2.add(entity.velocity)
 	})
 
 /*
-	StopThrust :: Entity -> Entity
+	StopAccelerating :: Entity -> Entity
 */
-export const StopThrust = entity => 
+export const StopAccelerating = entity => 
 	_.merge(entity, {
 		animation: null
 	})
@@ -96,12 +102,13 @@ export const Rotate = c_(
 /*
 	Boost :: (Phaser.State, Entity) -> Entity
 */
-export const Boost = stage => entity => 
-		_.merge(entity, {
-			velocity: pipe(
-				V2.fromAngle,
-				V2.multiply(-entity.state.thrustSpeed * 25 * _.delta(stage.game)),
-				V2.add(entity.velocity)
-			)(entity.angle),
-			emit: _.push(entity.emit, Events.Boost)
-		})
+export const Boost = c_(
+	(stage, entity) => _.merge(
+		entity.events(entity, Events.Boost), 
+		{
+			velocity: V2.fromAngle(entity.angle)
+				|> V2.multiply(-entity.state.thrustSpeed * 25 * _.delta(stage.game))
+				|> V2.add(entity.velocity)
+		}
+	)
+)

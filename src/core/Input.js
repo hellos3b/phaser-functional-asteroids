@@ -3,7 +3,7 @@ import * as Spaceship from "@/gameobjects/Spaceship"
 import * as _ from "@/utils"
 
 export const Keys = {
-	Thrust: 87,
+	Accelerate: 87,
 	RotateRight: 68,
 	RotateLeft: 65,
 	Boost: 32
@@ -63,11 +63,11 @@ export class InputStream {
 export const PlayerInput = c_(
 	(stage, entity) => {
 		const { state } = stage.input
-		const { Thrust, RotateRight, RotateLeft, Boost } = Keys
+		const { Accelerate, RotateRight, RotateLeft, Boost } = Keys
 
 		return pipe(
-			keyDown(state)(Thrust, Spaceship.Thrust(stage)),
-			onKeyUp(state)(Thrust, Spaceship.StopThrust),
+			keyDown(state)(Accelerate, Spaceship.Accelerate(stage)),
+			onKeyUp(state)(Accelerate, Spaceship.StopAccelerating),
 			keyDown(state)(RotateRight, Spaceship.Rotate(stage, 1)),
 			keyDown(state)(RotateLeft, Spaceship.Rotate(stage, -1)),
 			onKeyDown(state)(Boost, Spaceship.Boost(stage))

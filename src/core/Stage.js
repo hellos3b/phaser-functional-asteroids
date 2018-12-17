@@ -20,26 +20,6 @@ export const addToScene = c_(
 )
 
 /* 
-  updateEntities :: [Entity] -> [Entity]
-*/
-export const updateEntities = entities =>
-	entities.map(
-		entity => {
-			entity.update && entity.update()
-			return entity
-		}
-	).filter(e => e.state.alive)
-
-/* 
-  updateTimers :: (Number, [Timers]) -> [Timers]
-*/
-export const updateTimers = c_(
-	(time, timers) => timers.map(
-		t => t.addTime(time)
-	).filter(t => !t.done())
-)
-
-/* 
   addToGroup :: (Phaser.State, Sprite) -> Sprite
 */
 export const addToGroup = c_(
@@ -57,15 +37,12 @@ export const addToGroup = c_(
   spawn :: (Phaser.State, Entity) -> Entity
 */
 export const spawn = c_(
-	(stage, entity) => {
-		const sprite = pipe(
-			createSprite(stage.game),
-			addToScene(stage.game),
-			addToGroup(stage)
-		)(entity)
-
-		return _.merge(entity, { sprite })
-	}
+	(stage, entity) => _.merge(
+		entity, {
+			sprite: entity |> createSprite(stage.game)
+				|> addToScene(stage.game)
+				|> addToGroup(stage)
+		})
 )
 
 /* 
@@ -81,6 +58,7 @@ export const centerPosition = world => ({
 */
 export const addEntity = c_(
 	(stage, entity) => {
+		console.log("Adding Entity", entity)
 		const spawnQueue = _.push(
 			stage.state.spawnQueue,
 			entity

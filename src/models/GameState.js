@@ -7,6 +7,7 @@ export const model = _.Model({
     physicsStep       : 30 / 1000
   },
   state: {
+    paused: false,
     bonus       : 0,
     elapsedTime : 1
   },

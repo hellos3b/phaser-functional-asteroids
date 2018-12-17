@@ -37,7 +37,7 @@ const cssLoader = {
 
 // Expose PIXI and p2 so Phaser can use them from window.
 const exposePhaser = {
-  test: /phaser-split\.js$/,
+  test: /phaser-space\.js$/,
   use: [{
     loader: 'expose-loader',
     options: 'Phaser'
@@ -87,6 +87,26 @@ const copyAssets = new CopyWebpackPlugin([
 module.exports = {
   devtool: 'source-map',
 
+  entry: {
+    index: path.join(__root, 'src/index.js')
+  },
+
+  output: {
+    path: path.resolve(__root, 'dist'),
+    filename: '[name].[contenthash].js',
+  },
+
+  optimization: {
+    splitChunks: {
+      chunks: 'all',
+      cacheGroups: {
+        phaser: {
+          test: /[\\/]src[\\/]lib[\\/]/
+        },
+      }
+    }
+  },
+
   module: {
     rules: [
       jsLoader,
@@ -102,13 +122,15 @@ module.exports = {
     htmlPlugin,
     cssPlugin,
     copyAssets,
-    new BundleAnalyzerPlugin()
+    // Uncomment this line if you want to view package sizes
+    // new BundleAnalyzerPlugin()
   ],
   resolve: {
     alias: {
-      'phaser': path.join(phaserModule, 'build/custom/phaser-split.js'),
+      // 'phaser': path.join(phaserModule, 'build/custom/phaser-split.js'),
+      'phaser': path.join(__root, 'src/lib/phaser-space.js'),
       'pixi': path.join(phaserModule, 'build/custom/pixi.js'),
-      'p2': path.join(phaserModule, 'build/custom/p2.js'),
+      // 'p2': path.join(phaserModule, 'build/custom/p2.js'),
       '@': path.join(__root, 'src')
     }
   }

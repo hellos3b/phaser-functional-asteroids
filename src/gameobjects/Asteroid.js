@@ -1,77 +1,104 @@
 import { SpriteObject } from '@/core/SpriteObject'
 import { c_, State, pipe } from '@/utils/functional'
-import * as Utils from '@/utils'
-import * as Vector2 from '@/utils/Vector2'
+import * as _ from '@/utils'
+import * as Entity from '@/models/Entity'
+import * as V2 from '@/utils/Vector2'
 import * as Physics from '@/core/Physics'
+import * as Stage from '@/core/Stage'
 
-const defaultState = {
-    alive: true,
+export const Create = () =>
+	Entity.model({
+		alive: true,
 
-    physics: true,
-    bodyRadius: 8,
-    collisionGroup: Physics.CollisionGroups.Asteroid,
-    collisionTargets: [],
+		// sprite
+		asset: 'spritesheet',
+		frame: 0,
+		animations: {},
+		angle: 0,
 
-    position: {
-        x: 100,
-        y: 100
-    },
-    frame: 1,
-    anchor: {
-        x: 0.5,
-        y: 0.5
-    },
-    asset: 'spritesheet',
-    velocity: {
-        x: 0,
-        y: 0
-    },
-    rotateSpeed: 0
-}
+		// Physics
+		physicsEnabled: true,
+		bodyRadius: 8,
+		collisionGroup: Physics.CollisionGroups.Asteroid,
 
-export class Asteroid {
+		update: update
+	})
 
-    constructor(game, opt) {
-        this.game = game
-        this.state = new State({
-            ...defaultState,
-            ...opt
-        })
+/*
+	create :: (Phaser.State, Object) -> Entity
+*/
+export const create = c_(
+	(stage, props) => {
+		const position = rndOffScreenPosition(stage)
 
-        this.sprite = new SpriteObject(game, this.state)
-    }
+		return _.merge(Create(), {
+			position,
+			velocity: V2.toTarget( position, randomTarget(stage) ) |> V2.multiply( _.rnd(50, 150) ),
+			frame: _.rnd(0, 4),
+			angle: _.rnd(0, 359)
+		})
+	}
+)
 
-    update() {
-        this.updatePhysics()
+/*
+	update :: (Phaser.State, Entity) -> Entity
+*/
+const update = c_(
+	(stage, entity) => outOfBounds(stage, entity)
+		? _.merge(entity, { alive: false })
+		: entity
+)
 
-        if (this.outOfBounds()) return this.kill()
+/*
+	randomTarget :: Phaser.State -> Vector2
+*/
+const randomTarget = stage => Stage.centerPosition(stage.game.world) |> randomizePoint(300)
 
-        this.sprite.setState(this.state)
-        this.state.$clean()
-    }
+/*
+	randomizePoint :: (Int, Vector2) -> Vector2
+*/
+const randomizePoint = c_(
+	(amt, v) => ({
+		x: _.fluff(v.x, amt),
+		y: _.fluff(v.y, amt)
+	})
+)
 
-    updatePhysics() {
-        const { state } = this
-        const delta = Utils.delta(this.game, 1)
+/*
+	randomPosition :: Phaser.State -> Vector2
+*/
+const randomPosition = stage => ({
+	x: _.rnd(0, stage.game.width),
+	y: _.rnd(0, stage.game.height)
+})
 
-        // Physics.applyVelocity(delta, state)
-        Physics.rotate(state, delta, state.rotateSpeed)
-    }
+/*
+	offScreenPosition :: Phaser.State -> Vector2
+*/
+const offScreenPositions = stage => 
+	randomPosition(stage)
+		|> (v => ({
+			0: { x: -32, y: v.y },
+			1: { x: stage.game.width + 32, y:v.y },
+			2: { x: v.x, y: -32 },
+			3: { x: v.x, y: stage.game.height + 32 }
+		}))
 
-    outOfBounds() {
-        return this.state.position.x < -50 || this.state.position.x > this.game.width + 50
-            || this.state.position.y < -50 || this.state.position.y > this.game.height + 50
-    }
+/*
+		rndOffScreenPosition :: Phaser.State -> Vector2
+*/
+const rndOffScreenPosition = c_(
+	stage => _.rnd(0, 4)
+		|> _.findInObject( offScreenPositions(stage) )
+		|> (res => res.getOrElse({x: 0, y: 0}))
+)
 
-    moveTowards(target, speed) {
-        this.state.velocity = Vector2
-            .directionTowards(this.state.position, target)
-            .normalize()
-            .multiply(speed)
-    }
-
-    kill() {
-        this.sprite.destroy()
-        this.state.alive = false
-    }
-}
+/*
+	outOfBounds :: (Phaser.State, Entity) -> Boolean
+*/
+export const outOfBounds = c_(
+	(stage, entity) =>  entity.position.x < -50 
+		|| entity.position.x > stage.game.width + 50
+		|| entity.position.y < -50 
+		|| entity.position.y > stage.game.height + 50
+)

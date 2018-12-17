@@ -98,8 +98,10 @@ export const timerReady = c_(
   Takes a value, and adds a random +/- amount
 */
 export const fluff = c_(
-  (value, amount) => value + randomBetween(amount*-1, amount)
+  (value, amount) => value + rnd(amount*-1, amount)
 )
+
+export const noop = () => {}
 
 /* 
   toRadians :: Float -> Float
@@ -151,11 +153,12 @@ export const filter = c_(
   (fn, arr) => arr.filter(fn)
 )
 
+export const filterNull = arr => arr.filter( n => !n)
+
 /*
-  flat :: Array -> Object
-  Should probably be called flat merge
+  mergeDown :: Array(Object) -> Object
 */
-export const flat = arr =>
+export const mergeDown = arr =>
   arr.reduce( (res, cur) => merge(res, cur), {})
 
 /*
@@ -204,7 +207,7 @@ export const each = c_(
 /*
   Model :: Object -> Object -> Object
 */
-export const Model = (initial) => (obj) => Object.assign({}, initial, obj)
+export const Model = initial => (obj={}) => Object.assign({}, initial, obj)
 
 /*
   objMap :: (Function, Object) -> Object
@@ -220,4 +223,8 @@ export const objMap = c_(
 */
 export const push = c_(
   (arr, val) => [...arr, val]
+)
+
+export const getOrElse = c_(
+  (optional, T) => Maybe(T).getOrElse(optional)
 )

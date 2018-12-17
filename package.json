@@ -24,6 +24,8 @@
     "@babel/plugin-proposal-class-properties": "^7.2.1",
     "@babel/preset-env": "^7.2.0",
     "babel-loader": "^8.0.4",
+    "babel-plugin-pipe-composition": "^0.1.1",
+    "babel-plugin-transform-pipeline": "^0.1.0",
     "copy-webpack-plugin": "^4.6.0",
     "css-loader": "^2.0.0",
     "expose-loader": "^0.7.5",
@@ -39,6 +41,10 @@
     "webpack-dev-server": "^3.1.10"
   },
   "dependencies": {
+    "@babel/plugin-proposal-pipeline-operator": "^7.2.0",
+    "babel-plugin-all-curried": "^4.0.0",
+    "babel-plugin-curry-all": "^2.0.2",
+    "babel-plugin-transform-magic-currying": "0.0.2",
     "phaser-ce": "^2.11.1",
     "pixi": "^0.3.1"
   }
