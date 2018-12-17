@@ -113,25 +113,22 @@ Vector2.prototype = {
 
 export { Vector2 }
 
+// Static methods
+// (better in a functional setting)
 export const directionTowards = c_(
 	(position, target) =>
 		new Vector2(target.x, target.y)
 			.subtract(new Vector2(position.x, position.y))
 )
 
-export const fromAngle = c_(
-    angle => new Vector2(0, 1)
-            .rotate(Utils.toRadians(angle))
-)
+export const fromAngle = angle => new Vector2(0, 1).rotate(Utils.toRadians(angle))
 
 export const multiply = c_(
 	(amount, v) => v.multiply(amount)
 )
 
 export const toTarget = c_(
-	(position, target) => 
-		directionTowards(position, target)
-        	.normalize()
+	(position, target) => directionTowards(position, target).normalize()
 )
 
 export const normalize = v => v.normalize()

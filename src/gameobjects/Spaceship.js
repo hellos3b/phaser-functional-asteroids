@@ -10,59 +10,59 @@ import * as BoostEntity from '@/gameobjects/Boost'
 import { Vector2 } from '../utils/Vector2';
 
 export const Events = {
-	Boost: "boost"
+  Boost: "boost"
 }
 
 const MAX_VELOCITY = 400
 
 export const Create = () => 
-	Entity.model({
-		state: {
-			thrustSpeed: 400,
-			rotateSpeed: 270,
-			rotationSinceLastBoost: 0
-		},
-		
-		// sprite
-		asset: 'spaceship',
-		frame: 0,
-		animations: {
-			boost: {
-				frames: [1, 2, 3, 4],
-				loop: true,
-				fps: 10
-			}
-		},
-		animation: null,
-		angle: 0,
+  Entity.model({
+    state: {
+      thrustSpeed: 400,
+      rotateSpeed: 270,
+      rotationSinceLastBoost: 0
+    },
+    
+    // sprite
+    asset: 'spaceship',
+    frame: 0,
+    animations: {
+      boost: {
+        frames: [1, 2, 3, 4],
+        loop: true,
+        fps: 10
+      }
+    },
+    animation: null,
+    angle: 0,
 
-		// Physics
-		physicsEnabled: true,
-		bodyRadius: 8,
-		collisionGroup: Physics.CollisionGroups.Spaceship,
-		collisionTargets: [
-			Physics.CollisionGroups.Asteroid
-		],
-		gravity: true,
+    // Physics
+    physicsEnabled: true,
+    bodyRadius: 8,
+    collisionGroup: Physics.CollisionGroups.Spaceship,
+    collisionTargets: [
+      Physics.CollisionGroups.Asteroid
+    ],
+    gravity: true,
 
-		update
-	})
+    update
+  })
 
 const update = c_(
-	(stage, entity) => entity.input(entity) 
-		|> bounceOffWall(stage)
-		|> clampVelocity
+  (stage, entity) => entity.input(entity) 
+    |> bounceOffWall(stage)
+    |> clampVelocity
 )
 
 /*
   create :: Phaser.State -> Spaceship
 */
 export const create = stage =>
-	_.merge(Create(), {
-		position : Stage.centerPosition(stage.world),
-		input    : PlayerInput(stage),
-		events   : EventManager.Events(stage, PlayerEvents())
-	})
+  _.merge(Create(), {
+    position : Stage.centerPosition(stage.world),
+    input    : PlayerInput(stage),
+    events   : EventManager.Events(stage, PlayerEvents())
+  })
 
 /*
   playerEvents :: () -> Map(string, function) -> Entity
@@ -76,74 +76,76 @@ const PlayerEvents = () => ({
 })
 
 /*
-	bounceOffWall :: Spaceship -> Spaceship
+  bounceOffWall :: Spaceship -> Spaceship
 */
 const bounceOffWall = c_(
-	(stage, entity) => inBoundsX(stage, entity) ? entity
-		: _.merge(entity, {
-			position: {
-				x: entity.position.x < 0 ? 5 : stage.game.width - 5,
-				y: entity.position.y
-			},
-			velocity: {
-				x: entity.velocity.x * -1,
-				y: entity.velocity.y
-			}
-		})
+  (stage, entity) => inBoundsX(stage, entity) ? entity
+    : _.merge(entity, {
+      position: {
+        x: entity.position.x < 0 ? 5 : stage.game.width - 5,
+        y: entity.position.y
+      },
+      velocity: {
+        x: entity.velocity.x * -1,
+        y: entity.velocity.y
+      }
+    })
 )
 
 const clampVelocity = entity => 
-	_.merge(entity, {
-		velocity: V2.clamp(MAX_VELOCITY, entity.velocity) // |> V2.json
-	})
+  _.merge(entity, {
+    velocity: V2.clamp(MAX_VELOCITY, entity.velocity) // |> V2.json
+  })
 
+const flipBonus = entity =>
+  
 
 /*
-		inBoundsX :: (Phaser.State, Entity) -> Entity
+    inBoundsX :: (Phaser.State, Entity) -> Entity
 */
 const inBoundsX = c_(
-	(stage, entity) => entity.position.x > 0 && entity.position.x < stage.game.width
+  (stage, entity) => entity.position.x > 0 && entity.position.x < stage.game.width
 )
 
 /*
-	Accelerate :: Phaser.State -> Spaceship -> Spaceship
+  Accelerate :: Phaser.State -> Spaceship -> Spaceship
 */
 export const Accelerate = stage => entity => 
-	_.merge(entity, {
-		animation: "boost",
-		velocity: V2.fromAngle(entity.angle)
-			|> V2.multiply(-entity.state.thrustSpeed * _.delta(stage.game))
-			|> V2.add(entity.velocity)
-	})
+  _.merge(entity, {
+    animation: "boost",
+    velocity: V2.fromAngle(entity.angle)
+      |> V2.multiply(-entity.state.thrustSpeed * _.delta(stage.game))
+      |> V2.add(entity.velocity)
+  })
 
 /*
-	StopAccelerating :: Spaceship -> Spaceship
+  StopAccelerating :: Spaceship -> Spaceship
 */
 export const StopAccelerating = entity => 
-	_.merge(entity, {
-		animation: null
-	})
+  _.merge(entity, {
+    animation: null
+  })
 
 /*
-	Rotate :: (Phaser.State, Int, Spaceship) -> Spaceship
+  Rotate :: (Phaser.State, Int, Spaceship) -> Spaceship
 */
 export const Rotate = c_(
-	(stage, dir, entity) => 
-		_.merge(entity, {
-			angle: entity.angle += dir * entity.state.rotateSpeed * _.delta(stage.game)
-		})
+  (stage, dir, entity) => 
+    _.merge(entity, {
+      angle: entity.angle += dir * entity.state.rotateSpeed * _.delta(stage.game)
+    })
 )
 
 /*
-	Boost :: (Phaser.State, Entity) -> Entity
+  Boost :: (Phaser.State, Entity) -> Entity
 */
 export const Boost = c_(
-	(stage, entity) => _.merge(
-		entity.events(entity, Events.Boost), 
-		{
-			velocity: V2.fromAngle(entity.angle)
-				|> V2.multiply(-entity.state.thrustSpeed * 25 * _.delta(stage.game))
-				|> V2.add(entity.velocity)
-		}
-	)
+  (stage, entity) => _.merge(
+    entity.events(entity, Events.Boost), 
+    {
+      velocity: V2.fromAngle(entity.angle)
+        |> V2.multiply(-entity.state.thrustSpeed * 25 * _.delta(stage.game))
+        |> V2.add(entity.velocity)
+    }
+  )
 )

@@ -1,13 +1,13 @@
 export class Stream {
-    constructor() {
-        this.listeners = []
-    }
+  constructor() {
+    this.listeners = []
+  }
 
-    subscribe(fn) {
-        this.listeners.push(fn)
-    }
+  subscribe(fn) {
+    this.listeners.push(fn)
+  }
 
-    push(val) {
-        this.listeners.forEach( fn => fn(val) )
-    }
+  push(val) {
+    this.listeners.forEach(fn => fn(val))
+  }
 }

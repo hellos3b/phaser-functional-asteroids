@@ -8,26 +8,26 @@ let spriteIds = 1
 // Apply state -> actual sprite object
 const commits = {
 
-	setPosition: c_((sprite, { position }) => {
-		sprite.x = position.x
-		sprite.y = position.y
-	}),
+  setPosition: c_((sprite, { position }) => {
+    sprite.x = position.x
+    sprite.y = position.y
+  }),
 
-	setFrame: c_((sprite, state) => {
-		sprite.frame = state.frame
-	}),
+  setFrame: c_((sprite, state) => {
+    sprite.frame = state.frame
+  }),
 
-	setAnchor: c_((sprite, { anchor }) => {
-		sprite.anchor.setTo(anchor.x, anchor.y)
-	}),
+  setAnchor: c_((sprite, { anchor }) => {
+    sprite.anchor.setTo(anchor.x, anchor.y)
+  }),
 
-	setAnimation: c_((sprite, { frame, animation }) => {
-		if (animation) {
-			sprite.animations.play(animation)
-		} else {
-			sprite.animations.stop()
-			sprite.frame = frame
-		}
+  setAnimation: c_((sprite, { frame, animation }) => {
+    if (animation) {
+      sprite.animations.play(animation)
+    } else {
+      sprite.animations.stop()
+      sprite.frame = frame
+    }
   }),
 
   setAlive: c_((sprite, {alive}) => {
@@ -36,11 +36,11 @@ const commits = {
     }
   }),
   
-	setAngle: c_((sprite, { angle }) => {
-		sprite.angle = angle
-	}),
+  setAngle: c_((sprite, { angle }) => {
+    sprite.angle = angle
+  }),
 
-	setBodyRadius: c_((sprite, { physicsEnabled, bodyRadius }) => {
+  setBodyRadius: c_((sprite, { physicsEnabled, bodyRadius }) => {
     if (physicsEnabled) {
       sprite.body.setCircle(
         bodyRadius,    
@@ -48,7 +48,7 @@ const commits = {
         (-bodyRadius + 0.5 * sprite.height / sprite.scale.y)
       )
     }
-	})
+  })
 
 }
 
@@ -89,10 +89,10 @@ const emitEvent = c_(
   Updates the sprite with all the setters to their new values
 */
 const commitSpriteUpdate = c_(
-	(sprite, state, committer) =>
+  (sprite, state, committer) =>
     committer
-			.getOrElse(() => {})
-			.call(null, sprite, state)
+      .getOrElse(() => {})
+      .call(null, sprite, state)
 )
 
 /* 
@@ -101,8 +101,8 @@ const commitSpriteUpdate = c_(
 */
 const prefixPropertyName = str => 
   "set" +
-		str.charAt(0).toUpperCase() +
-		str.substring(1)
+    str.charAt(0).toUpperCase() +
+    str.substring(1)
 
 const updateProperty = c_(
   (sprite, state, key) => key
