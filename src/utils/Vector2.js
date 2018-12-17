@@ -134,10 +134,19 @@ export const toTarget = c_(
         	.normalize()
 )
 
-export const normalize = c_(
-	(v) => v.normalize()
-)
+export const normalize = v => v.normalize()
 
 export const add = c_(
 	(v, v2) => new Vector2(v.x, v.y).add(v2)
 )
+
+export const magnitude = v => new Vector2(v.x, v.y).magnitude
+
+export const clamp = c_(
+	(max, v) => {
+		v = new Vector2(v.x, v.y)
+		return (v.magnitude() > max) ? v.normalize().multiply(max) : v
+	}
+)
+
+export const json = v => ({ x: v.x, y: v.y })

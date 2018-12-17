@@ -1,11 +1,11 @@
 import * as _ from "@/utils"
 
-export const model = () => _.Model({
-  count   : 0,
+export const model = (props) => _.Model({
+  count   : () => {},
   current : 0,
   loop    : false,
   done    : () => {}
-})()
+})(props)
 
 
 /*
@@ -25,6 +25,9 @@ const updateTimer = c_(
   (delta, timer) => timer |> addTime(delta) |> emitIfDone
 )
 
+/*
+  timerShouldContinue :: Timer -> Boolean
+*/
 const timerShouldContinue = timer => timer.loop || timer.current < timer.count()
 
 /*

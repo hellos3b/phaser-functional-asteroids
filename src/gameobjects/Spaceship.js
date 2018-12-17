@@ -7,10 +7,13 @@ import * as EventManager from '@/core/Events'
 import * as Stage from '@/core/Stage'
 import {PlayerInput } from '@/core/Input'
 import * as BoostEntity from '@/gameobjects/Boost'
+import { Vector2 } from '../utils/Vector2';
 
 export const Events = {
 	Boost: "boost"
 }
+
+const MAX_VELOCITY = 400
 
 export const Create = () => 
 	Entity.model({
@@ -46,7 +49,9 @@ export const Create = () =>
 	})
 
 const update = c_(
-	(stage, entity) => entity.input(entity)
+	(stage, entity) => entity.input(entity) 
+		|> bounceOffWall(stage)
+		|> clampVelocity
 )
 
 /*
@@ -64,25 +69,55 @@ export const create = stage =>
 */
 const PlayerEvents = () => ({
   [Events.Boost]: (stage, entity) => {
-    Stage.addEntity(stage, BoostEntity.create(stage, entity))
+    BoostEntity.create(stage, entity) |> Stage.addEntity(stage)
     stage.game.camera.shake(0.01, 60)
     return entity
   }
 })
 
 /*
-	Accelerate :: Phaser.State -> Entity -> Entity
+	bounceOffWall :: Spaceship -> Spaceship
+*/
+const bounceOffWall = c_(
+	(stage, entity) => inBoundsX(stage, entity) ? entity
+		: _.merge(entity, {
+			position: {
+				x: entity.position.x < 0 ? 5 : stage.game.width - 5,
+				y: entity.position.y
+			},
+			velocity: {
+				x: entity.velocity.x * -1,
+				y: entity.velocity.y
+			}
+		})
+)
+
+const clampVelocity = entity => 
+	_.merge(entity, {
+		velocity: V2.clamp(MAX_VELOCITY, entity.velocity) // |> V2.json
+	})
+
+
+/*
+		inBoundsX :: (Phaser.State, Entity) -> Entity
+*/
+const inBoundsX = c_(
+	(stage, entity) => entity.position.x > 0 && entity.position.x < stage.game.width
+)
+
+/*
+	Accelerate :: Phaser.State -> Spaceship -> Spaceship
 */
 export const Accelerate = stage => entity => 
 	_.merge(entity, {
 		animation: "boost",
-		velocity: entity.angle |> V2.fromAngle
+		velocity: V2.fromAngle(entity.angle)
 			|> V2.multiply(-entity.state.thrustSpeed * _.delta(stage.game))
 			|> V2.add(entity.velocity)
 	})
 
 /*
-	StopAccelerating :: Entity -> Entity
+	StopAccelerating :: Spaceship -> Spaceship
 */
 export const StopAccelerating = entity => 
 	_.merge(entity, {
@@ -90,7 +125,7 @@ export const StopAccelerating = entity =>
 	})
 
 /*
-	Rotate :: (Phaser.State, Int, Entity) -> Entity
+	Rotate :: (Phaser.State, Int, Spaceship) -> Spaceship
 */
 export const Rotate = c_(
 	(stage, dir, entity) => 

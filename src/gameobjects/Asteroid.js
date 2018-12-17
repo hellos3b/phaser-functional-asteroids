@@ -5,6 +5,7 @@ import * as Entity from '@/models/Entity'
 import * as V2 from '@/utils/Vector2'
 import * as Physics from '@/core/Physics'
 import * as Stage from '@/core/Stage'
+import * as Timer from '@/models/Timer'
 
 export const Create = () =>
 	Entity.model({
@@ -51,11 +52,13 @@ const update = c_(
 
 /*
 	randomTarget :: Phaser.State -> Vector2
+	Creates a random Vector near the center of the stage for the asteroid to accelerate to
 */
 const randomTarget = stage => Stage.centerPosition(stage.game.world) |> randomizePoint(300)
 
 /*
 	randomizePoint :: (Int, Vector2) -> Vector2
+	Randomizes a vector by a certain amount
 */
 const randomizePoint = c_(
 	(amt, v) => ({
@@ -66,6 +69,7 @@ const randomizePoint = c_(
 
 /*
 	randomPosition :: Phaser.State -> Vector2
+	Gts a random position anywhere in the stage
 */
 const randomPosition = stage => ({
 	x: _.rnd(0, stage.game.width),
@@ -73,7 +77,8 @@ const randomPosition = stage => ({
 })
 
 /*
-	offScreenPosition :: Phaser.State -> Vector2
+	offScreenPosition :: Phaser.State -> Map(Int, Vector2)
+	Creates a random positions for up, down, left and right
 */
 const offScreenPositions = stage => 
 	randomPosition(stage)
@@ -86,6 +91,7 @@ const offScreenPositions = stage =>
 
 /*
 		rndOffScreenPosition :: Phaser.State -> Vector2
+		Returns a random position anywhere out of screen
 */
 const rndOffScreenPosition = c_(
 	stage => _.rnd(0, 4)
@@ -101,4 +107,12 @@ export const outOfBounds = c_(
 		|| entity.position.x > stage.game.width + 50
 		|| entity.position.y < -50 
 		|| entity.position.y > stage.game.height + 50
+)
+
+export const spawnTimer = c_(
+	(stage, timeFn) => Timer.model({
+		count	: timeFn,
+		loop	: true,
+		done	: () => create(stage, {}) |> Stage.addEntity(stage)
+	})
 )

@@ -87,18 +87,8 @@ const init = (stage, options) => {
 */
 const create = stage => {
   Spaceship.create(stage) |> Stage.addEntity(stage)
-  stage.state.timers.push( 
-    _.merge(Timer.model(), {
-      count : () => 0.25,
-      loop  : true,
-      done  : () => Asteroid.create(stage, {}) |> Stage.addEntity(stage)
-    }))
-  stage.state.timers.push( 
-    _.merge(Timer.model(), {
-      count : () => 0.35,
-      loop  : true,
-      done  : () => Asteroid.create(stage, {}) |> Stage.addEntity(stage)
-    }))
+  Asteroid.spawnTimer(stage, () => 0.20) |> stage.state.timers.push
+  Asteroid.spawnTimer(stage, () => 0.35) |> stage.state.timers.push
 }
 
 /*

@@ -58,7 +58,6 @@ export const centerPosition = world => ({
 */
 export const addEntity = c_(
 	(stage, entity) => {
-		console.log("Adding Entity", entity)
 		const spawnQueue = _.push(
 			stage.state.spawnQueue,
 			entity
