@@ -36,6 +36,7 @@ export const onKeyDown = c_(
 )
 
 const setKeyDown = e => {
+  e.preventDefault()
   if (state.hasOwnProperty(e.keyCode)) {
     state[e.keyCode] = true
   }
