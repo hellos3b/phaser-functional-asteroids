@@ -1,17 +1,14 @@
 import { Maybe, c_ } from '@/utils/functional'
-import { Vector2, add } from '../utils/Vector2'
-import { pipe } from '../utils/functional'
+import * as V2 from '../utils/Vector2'
 import * as _ from '@/utils'
 
 export const GRAVITY = { x: 0, y: -150 }
 
 export const apply = c_(
-  (delta, props) => 
-    pipe(
-      props.gravity ? incVelocity(GRAVITY, delta) : _.id,
-      updatePosition(delta),
-      rotate(delta)
-    )(props)
+  (delta, props) => props
+      |> _.tr("gravity", incVelocity(GRAVITY, delta))
+      |> updatePosition(delta)
+      |> rotate(delta)
 )
 
 export const updatePosition = c_(
@@ -35,6 +32,34 @@ export const incVelocity = c_(
   }
 )
 
+export const testCollisions = c_(
+  (stage, entity) => Object.entries(entity.collisions)
+    |> _.map(overlap(stage, entity))
+    |> _.merge(entity)
+)
+
+
+export const overlap = c_(
+  (stage, entity, [group, callback]) => _.map(sprite => {
+      if (stage.game.physics.arcade.overlap(entity.sprite, sprite)) {
+        console.log("collision", group, callback)
+        return callback(stage, entity, sprite)
+      } else {
+        return entity
+      }
+    }, stage.groups[group].children) 
+    |> _.mergeDown
+)
+
+/*
+  clampVelocity = Entity -> Entity
+*/
+export const clampVelocity = c_(
+  (max, entity) => _.merge(entity, {
+      velocity: V2.clamp(max, entity.velocity)
+    })
+)
+
 export const rotate = c_(
   (delta, props) => {
     props.angle += props.angVelocity * delta
@@ -48,35 +73,11 @@ export const CollisionGroups = {
 }
 
 export const intersects = c_(
-  (stateA, stateB) => {
-    const distance = new Vector2(stateA.position.x, stateA.position.y)
-      .distance(new Vector2(stateB.position.x, stateB.position.y))
-
-    return distance <= stateA.collisionRadius || distance <= stateB.collisionRadius
-  }
+  (stateA, stateB) => V2.distance(stateA.position, stateB.position) <= stateA.collisionRadius || distance <= stateB.collisionRadius
 )
 
-export const overlap = c_(
-  (stage, entity, group) => 
-    stage.game.physics.arcade.overlap(
-      entity.sprite,
-      stage.groups[group],
-      entity.collisions,
-      null,
-      entity
-    )
 
-)
-
-export const checkCollision = c_(
-  (stage, entity) =>
-    entity
-      .state
-      .collisionTargets
-      .forEach(overlap(stage, entity))
-)
-
-export const testCollisions = c_(
-  (stage, entities) =>
-    entities.forEach(checkCollision(stage))
-)
+// export const testCollisions = c_(
+//   (stage, entities) =>
+//     entities.forEach(checkCollision(stage))
+// )

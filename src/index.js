@@ -1,3 +1,5 @@
+import "@babel/polyfill"
+
 import 'pixi'
 import Phaser from 'phaser'
 

@@ -96,9 +96,7 @@ const increaseScore = c_(
     )()
 )
 
-const scoreMultiplier = c_(
-  elapsed => Math.pow(3*elapsed, 2)
-)
+const scoreMultiplier = elapsed => Math.pow(3*elapsed, 2)
 
 export class Game extends Phaser.State {
   init(options) { 

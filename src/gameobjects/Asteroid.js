@@ -36,7 +36,8 @@ export const create = c_(
       position,
       velocity: V2.toTarget( position, randomTarget(stage) ) |> V2.multiply( _.rnd(50, 150) ),
       frame: _.rnd(0, 4),
-      angle: _.rnd(0, 359)
+      angle: _.rnd(0, 359),
+      angVelocity: _.rnd(-180, 180)
     })
   }
 )
@@ -46,7 +47,7 @@ export const create = c_(
 */
 const update = c_(
   (stage, entity) => outOfBounds(stage, entity)
-    ? _.merge(entity, { alive: false })
+    ? Entity.die(entity)
     : entity
 )
 
@@ -54,7 +55,7 @@ const update = c_(
   randomTarget :: Phaser.State -> Vector2
   Creates a random Vector near the center of the stage for the asteroid to accelerate to
 */
-const randomTarget = stage => Stage.centerPosition(stage.game.world) |> randomizePoint(300)
+const randomTarget = stage => Stage.centerPosition(stage.game.world) |> randomizePoint(400)
 
 /*
   randomizePoint :: (Int, Vector2) -> Vector2

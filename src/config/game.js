@@ -4,8 +4,3 @@ export const LOCAL_STORAGE_NAME = 'phaseres6webpack'
 
 
 export const BACKGROUND_COLOR = "#151515"
-
-export const SCORE_STYLE = { 
-    font: "bold 24px Orbitron", 
-    fill: "#666"
-}

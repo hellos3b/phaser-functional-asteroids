@@ -24,7 +24,7 @@ export const model = _.Model({
   physicsEnabled: false,
   bodyRadius: 8,
   collisionGroup: -1,
-  collisionTargets: [],
+  collisions: {},
   gravity: false,
   velocity: {
     x: 0,

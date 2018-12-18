@@ -1,17 +1,13 @@
 import * as _ from "@/utils"
 
 export const model = _.Model({
-  config: {
-    lastAsteroidSpawn : 0,
-    asteroidSpawnRate : 0.15,
-    physicsStep       : 30 / 1000
-  },
-  state: {
-    paused: false,
-    bonus       : 0,
-    elapsedTime : 1
-  },
+  paused      : false,
+  end         : false,
+  bonus       : 0,
+  score       : 0,
+  elapsedTime : 1,
+  playerVelocity: 1,
   gameObjects : [],
-  spawnQueue: [],
+  spawnQueue  : [],
   timers      : []
 })

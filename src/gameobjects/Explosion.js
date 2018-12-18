@@ -20,32 +20,21 @@ export const Create = () => Entity.model({
     x: 0.5,
     y: 0.5
   },
-  asset: 'spaceship',
+  asset: 'explosion',
   animations: {
     play: {
-      frames: [6, 7, 8, 9],
-      fps: 20,
+      frames: [0, 1, 2, 3],
+      fps: 10,
       onDone: Events.onDone
     }
   },
   animation: "play",
 })
 
-const SPAWN_OFFSET = 16
-
-/*
-  getPosition :: Spaceship -> Object
-*/
-export const getPosition = spaceship => pipe(
-    V2.fromAngle,
-    V2.multiply(SPAWN_OFFSET),
-    V2.add(spaceship.position)
-  )(spaceship.angle)
-
 /*
   BoostEvents :: () -> Map(String, Function)
 */
-const BoostEvents = () => ({
+const ExplodeEvents = () => ({
   [Events.onDone]: (stage, entity) => Entity.die(entity)
 })
 
@@ -56,7 +45,7 @@ export const create = c_(
   (stage, target) => 
     _.merge(
       Create(), {
-        position: getPosition(target),
-        events: EventManager.Events(stage, BoostEvents())
+        position: target.position,
+        events: EventManager.Events(stage, ExplodeEvents())
       })
 )

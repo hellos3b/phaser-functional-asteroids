@@ -137,7 +137,7 @@ export const add = c_(
 	(v, v2) => new Vector2(v.x, v.y).add(v2)
 )
 
-export const magnitude = v => new Vector2(v.x, v.y).magnitude
+export const magnitude = v => new Vector2(v.x, v.y).magnitude()
 
 export const clamp = c_(
 	(max, v) => {
@@ -147,3 +147,5 @@ export const clamp = c_(
 )
 
 export const json = v => ({ x: v.x, y: v.y })
+
+export const distance = (v1, v2) => new Vector2(v1.x, v1.y).distance(new Vector2(v2.x, v2.y))

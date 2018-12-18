@@ -59,11 +59,11 @@ export const centerPosition = world => ({
 export const addEntity = c_(
   (stage, entity) => {
     const spawnQueue = _.push(
-      stage.state.spawnQueue,
+      stage._state.spawnQueue,
       entity
     )	
 
-    stage.state.$commit({ spawnQueue })
+    stage._state.$commit({ spawnQueue })
     return entity
   }
 )

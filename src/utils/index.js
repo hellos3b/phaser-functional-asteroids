@@ -86,6 +86,11 @@ export const map = c_(
   (fn, arr) => arr.map(fn)
 )
 
+export const wait = ms =>
+  new Promise( (resolve) => {
+    setTimeout(resolve, ms)
+  })
+
 /* 
   timerReady :: (Float, Float) -> Boolean
 */
@@ -147,22 +152,61 @@ export const has = c_(
 )
 
 /*
+  has :: (Key, Function, T) -> T
+  if T has 'key', call function and T
+*/
+export const tr = c_(
+  (key, fn, obj) => obj[key] === true ? fn(obj) : obj
+)
+
+/*
   filter :: (Function, Array) -> Array
 */
 export const filter = c_(
   (fn, arr) => arr.filter(fn)
 )
 
+export const toLerp = c_(
+  (start, end, val) => {
+    const max = end - start
+    const test = val - start
+    if (test < start) return 0
+    if (test > end) return 1
+    return test / max
+  }
+)
+
+export const lerp = c_(
+  (min, max, amt) => {
+    amt = amt > 1 ? max : amt
+    amt = amt < 0 ? min : amt
+    const diff = amt * (max - min)
+    return min+diff
+  }
+)
+
+export const ilerp = c_(
+  (max, min, amt) => {
+    amt = amt > 1 ? min : amt
+    amt = amt < 0 ? max : amt
+    const diff = amt * (max - min)
+    return max-diff
+  }
+)
+
+export const round = val =>
+  Math.floor(val * 10) / 10
+
 export const filterNull = arr => arr.filter( n => !n)
 
 /*
-  mergeDown :: Array(Object) -> Object
+  mergeDown :: [T] -> T
 */
 export const mergeDown = arr =>
   arr.reduce( (res, cur) => merge(res, cur), {})
 
 /*
-  toObject :: (T, Array) -> Object[Array->T]
+  toObject :: (T, [Key]) -> Map<Key, T>
   Converts an array into an object with default vaues
 */
 export const toObject = c_(
