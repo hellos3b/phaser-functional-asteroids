@@ -7,7 +7,7 @@
 *
 * Phaser - http://phaser.io
 *
-* v2.11.1 "2018-10-02" - Built: Sun Dec 16 2018 14:52:02
+* v2.11.1 "2018-10-02" - Built: Tue Dec 18 2018 13:29:06
 *
 * By Richard Davey http://www.photonstorm.com @photonstorm
 *
@@ -30,8 +30,6 @@
 /**
  * @author Mat Groves http://matgroves.com/ @Doormat23
  */
-
-(function(){
 
     var root = this;
 
@@ -7784,26 +7782,22 @@ PIXI.TextureUvs = function ()
  * @author Mat Groves http://matgroves.com/ @Doormat23
  */
 
-    if (typeof exports !== 'undefined') {
-        if (typeof module !== 'undefined' && module.exports) {
-            exports = module.exports = PIXI;
-        }
-        exports.PIXI = PIXI;
-    } else if (typeof define !== 'undefined' && define.amd) {
-        define('PIXI', (function() { return root.PIXI = PIXI; })() );
-    } else {
-        root.PIXI = PIXI;
+if (typeof exports !== 'undefined') {
+    if (typeof module !== 'undefined' && module.exports) {
+        exports = module.exports = PIXI;
     }
-
-    return PIXI;
-}).call(this);
+    exports.PIXI = PIXI;
+} else if (typeof define !== 'undefined' && define.amd) {
+    define('PIXI', (function() { return root.PIXI = PIXI; })() );
+} else {
+    root.PIXI = PIXI;
+}
 /**
 * @author       Richard Davey <rich@photonstorm.com>
 * @copyright    2016 Photon Storm Ltd.
 * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 */
 
-(function(){
 
     var root = this;
 
@@ -70850,19 +70844,16 @@ PIXI.canUseNewCanvasBlendModes = function ()
 * @license      {@link https://github.com/photonstorm/phaser/blob/master/license.txt|MIT License}
 */
 
-    if (typeof exports !== 'undefined') {
-        if (typeof module !== 'undefined' && module.exports) {
-            exports = module.exports = Phaser;
-        }
-        exports.Phaser = Phaser;
-    } else if (typeof define !== 'undefined' && define.amd) {
-        define('Phaser', (function() { return root.Phaser = Phaser; })() );
-    } else {
-        root.Phaser = Phaser;
+if (typeof exports !== 'undefined') {
+    if (typeof module !== 'undefined' && module.exports) {
+        exports = module.exports = Phaser;
     }
-
-    return Phaser;
-}).call(this);
+    exports.Phaser = Phaser;
+} else if (typeof define !== 'undefined' && define.amd) {
+    define('Phaser', (function() { return root.Phaser = Phaser; })() );
+} else {
+    root.Phaser = Phaser;
+}
 
 /*
 * "What matters in this life is not what we do but what we do for others, the legacy we leave and the imprint we make." - Eric Meyer

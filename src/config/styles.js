@@ -25,3 +25,15 @@ export const restartText = {
   fill: "#757575",
   boundsAlignH: "center"
 }
+
+export const statTitle = {
+  font: "16px Orbitron",
+  fill: "#757575",
+  boundsAlignH: "center"  
+}
+
+export const statDetail = {
+  font: "24px Orbitron",
+  fill: "#0f0",
+  boundsAlignH: "center"  
+}

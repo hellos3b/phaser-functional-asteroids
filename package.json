@@ -33,6 +33,7 @@
     "babel-polyfill": "^6.26.0",
     "copy-webpack-plugin": "^4.6.0",
     "css-loader": "^2.0.0",
+    "exports-loader": "^0.7.0",
     "expose-loader": "^0.7.5",
     "file-loader": "^2.0.0",
     "gh-pages": "^2.0.1",
@@ -41,6 +42,7 @@
     "less": "^3.9.0",
     "less-loader": "^4.1.0",
     "mini-css-extract-plugin": "^0.5.0",
+    "script-loader": "^0.7.2",
     "webpack": "^4.27.1",
     "webpack-bundle-analyzer": "^3.0.3",
     "webpack-cli": "^3.1.2",
@@ -51,6 +53,7 @@
     "babel-plugin-all-curried": "^4.0.0",
     "babel-plugin-curry-all": "^2.0.2",
     "babel-plugin-transform-magic-currying": "0.0.2",
+    "imports-loader": "^0.8.0",
     "phaser-ce": "^2.11.1",
     "pixi": "^0.3.1"
   }

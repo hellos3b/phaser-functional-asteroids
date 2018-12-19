@@ -27,10 +27,9 @@ const SPEED_BONUS = 20
   Initialize references 
 */
 const init = (stage, options) => {
-  stage.refs = {}
+  stage._refs = {}
   stage._state = new State(GameState.model(options))
-  console.log("INIT STATE", stage._state)
-  stage.groups = new Groups(stage.game, _.concat(["default"], Object.values(Physics.CollisionGroups)))
+  stage.groups = new Groups(stage.game,["default", ...Object.values(Physics.CollisionGroups)])
   Audio.loadConfig(stage)
   window.sg = stage // * debug
 }
@@ -39,12 +38,10 @@ const init = (stage, options) => {
   Create the player and start the game timers
 */
 const create = stage => {
-  stage.refs.score = stage.game.add.text(20, 20, 0, Styles.Score)
-  stage.refs.bonus = stage.game.add.text(20, 46, 0, Styles.Bonus)
+  stage._refs.score = stage.game.add.text(20, 20, 0, Styles.Score)
+  stage._refs.bonus = stage.game.add.text(20, 46, 0, Styles.Bonus)
   Spaceship.create(stage, PlayerEvents()) |> Stage.addEntity(stage)
-  
-  stage._state.timers = Asteroid.spawnTimer(stage, () => getAsteroidSpeed(stage)) 
-    |> _.push(stage._state.timers)
+
 
   // Asteroid.spawnTimer(stage, () => {
   //   const time = _.toLerp(1, 250000, stage._state.score)  
@@ -53,7 +50,14 @@ const create = stage => {
   // }) |> stage._state.timers.push
 
   Audio.loop("gameOST")
-  // Asteroid.spawnTimer(stage, () => 0.35) |> stage._state.timers.push
+}
+
+const start = stage => {
+  stage._state.timers = 
+    Asteroid.spawnTimer(stage, () => getAsteroidSpeed(stage)) 
+      |> _.push(stage._state.timers)
+  
+  stage._state.$commit({ started: true })
 }
 
 /*
@@ -61,7 +65,11 @@ const create = stage => {
 */
 const update = (stage, state) => {
   if (stage._state.end) {
-    Input.onKeyDown(Input.Keys.Restart, () => { console.log("PRESS F"); restartStage(stage)}, {})
+    Input.onKeyDown(Input.Keys.Restart, () => restartStage(stage), {})
+  }
+
+  if (!stage._state.started) {
+    Input.onKeyAny(() => start(stage), {})
   }
 
   nextState(stage, state) |> state.$commit
@@ -75,23 +83,24 @@ const update = (stage, state) => {
 const nextState = (stage, state) => {
   // Game objects need to be updated first, and then the spawn queue
   // needs to be done after for any entity that spawned something mid-update
-  state.elapsedTime = !state.end ? state.elapsedTime + _.delta(stage.game, 1) : state.elapsedTime
+  if (state.started) {
 
-  state.gameObjects = updateEntities(stage)(state.gameObjects)
-  state.timers = Timer.updateAll(stage)(state.timers)
-  state.gameObjects = spawnEntities(stage, state.spawnQueue)
+    state.gameObjects = updateEntities(stage, state.gameObjects)
+
+    state.elapsedTime = !state.end ? state.elapsedTime + _.delta(stage.game, 1) : state.elapsedTime
+    state.score = !state.end ? addScore(stage) : state.score
+
+    state.timers = Timer.updateAll(stage)(state.timers)
+  }
+
+  state.gameObjects = spawnEntities(stage, state.spawnQueue) 
     |> _.concat(state.gameObjects)
   state.spawnQueue = []
-  state.score = !state.end ? addScore(stage) : state.score
 
   return state
 }
 
-const getBonus = state => _.toLerp(100, 400, state.playerVelocity) |> _.lerp(0, SPEED_BONUS)
-
-const addScore = ({_state, game}) => {
-  return _state.score + _.delta(game, 1)*_state.elapsedTime*(getBonus(_state) + 1)
-}
+const addScore = ({_state, game}) => _state.score + _.delta(game, 1)*_state.elapsedTime*(getBonus(_state) + 1)
 
 /*
   spawnEntities :: (Phaser.State, [Entity]) -> [Entity]
@@ -124,14 +133,24 @@ const updateEntity = c_(
 )
 
 const updateUI = stage => {
-  stage.refs.score.text = Math.floor(stage._state.score) |> _.numberCommas
-  const bonus = getBonus(stage._state) |> _.round
-  stage.refs.bonus.text = 'x' + bonus
+  const bonus = getBonus(stage._state)
+  stage._refs.score.text = getScoreString(stage)
+  stage._refs.bonus.text = toBonusString(bonus)
+  if (bonus < 10) {
+    stage._refs.bonus.addColor("#666", 0)
+  } else if (bonus < 15) {
+    stage._refs.bonus.addColor("#20381a", 0)
+  } else if (bonus < 19) {
+    stage._refs.bonus.addColor("#48ce27", 0)
+  } else {
+    stage._refs.bonus.addColor("#e51ee9", 0)
+  }
 }
 
+const getBonus = state => _.toLerp(100, 400, state.playerVelocity) |> _.lerp(0, SPEED_BONUS)
 const restartStage = stage => stage.state.start('Game')
-
-const getScore = stage => Math.pow(3*stage._state.elapsedTime, 2)
+const toBonusString = bonus => 'x' + Math.floor(bonus)
+const getScoreString = stage => Math.floor(stage._state.score) |> _.numberCommas
 
 /*
   commitToSprite :: Entity -> Entity
@@ -150,28 +169,97 @@ const commitToSprite = obj => obj.sprite.commit(obj)
 const PlayerEvents = () => ({
   [Spaceship.Events.Die]: (stage, entity) => {
     Audio.stop("gameOST")
-    showScore(stage)
+    showFinalScore(stage)
   }
 })
 
 const getAsteroidSpeed = stage => _.toLerp(0, 60, stage._state.elapsedTime)  |> _.ilerp(1, 0.15)
 
-const showScore = async (stage) => {
-  await _.wait(1500)
-  stage.game.camera.shake(0.04, 120)
-  Audio.play("boost")
-  const title = stage.game.add.text(0, 100, "SCORE", Styles.scoreTitle)
-  title.setTextBounds(0, 0, stage.game.width, 100)
+const showEndText = c_(
+  (stage, style, y, text) => {
+    const textSprite = stage.game.add.text(0, y, text, style)
+    textSprite.setTextBounds(0, 0, stage.game.width, 100)
+  }
+)
 
-  await _.wait(500)
-  stage.game.camera.shake(0.04, 120)
+const slamUI = stage => {
   Audio.play("boost")
-  const score = stage.game.add.text(0, 136, Math.floor(stage._state.score) |> _.numberCommas, Styles.scoreText)
-  score.setTextBounds(0, 0, stage.game.width, 100)
+  stage.game.camera.shake(0.04, 120)
+}
 
-  await _.wait(500)
-  const restart = stage.game.add.text(0, 200, "Press F to restart", Styles.restartText)
-  restart.setTextBounds(0, 0, stage.game.width, 100)
+const endTitleTimer = stage => Timer.model({
+  count	: () => 1500 / 1000,
+  done	: () => {
+    slamUI(stage)
+    showEndText(stage, Styles.scoreTitle, 50,  "SCORE")
+  }
+})
+
+const endScoreTimer = stage => Timer.model({
+  count	: () => 2000 / 1000,
+  done	: () => {
+    slamUI(stage)
+    getScoreString(stage) |> showEndText(stage, Styles.scoreText, 86)
+  }
+})
+
+const endStatsTimer = stage => Timer.model({
+  count	: () => 2500 / 1000,
+  done	: () => showEndStats(stage)
+})
+
+const showEndStats = c_(
+  (stage) => {
+    showEndText(stage, Styles.restartText, 140, "Press [F] to restart")
+    statElement(stage, -140, "JUMPS", stage._state.jumps)
+    statElement(stage, 0, "TIME", mmss(stage._state.elapsedTime))
+    statElement(stage, 140, "FLIPS", stage._state.flips)
+  }
+)
+
+const padZero = val => (val < 10) ? '0' + val : val
+
+const mmss = seconds => {
+	const minutes = Math.floor(seconds / 60)
+	seconds = Math.floor(seconds % 60)
+	return `${padZero(minutes)}:${padZero(seconds)}`
+}
+
+const statElement = (stage, offsetX, name, val) => {
+  const width = 100
+  const titleSprite = stage.game.add.text(0, 0, name, Styles.statTitle)
+  titleSprite.setTextBounds(
+    stage.game.world.centerX + offsetX - (width/2), 
+    210,
+    width, 
+    100
+  )
+  const detailSprite = stage.game.add.text(0, 0, val, Styles.statDetail)
+  detailSprite.setTextBounds(
+    stage.game.world.centerX + offsetX - (width/2), 
+    180,
+    width, 
+    100
+  )
+}
+
+const showFinalScore = stage => {
+  stage._state.timers = _.concat(
+    stage._state.timers, 
+    [endTitleTimer(stage), endScoreTimer(stage), endStatsTimer(stage)]
+  )
+  // await _.wait(1500)
+  // slamUI(stage)
+  // showEndText(stage, Styles.scoreTitle, 50,  "SCORE")
+
+  // await _.wait(500)
+  // slamUI(stage)
+  // getScoreString(stage) |> showEndText(stage, Styles.scoreText, 86)
+
+  // await _.wait(500)
+  // showEndText(stage, Styles.restartText, 140, "Press F to restart")
+
+  // stage._state.$commit({ resart: true })
 }
 
 // Need to use function instead of arrows so we don't scope it to window lol

@@ -9,6 +9,7 @@ import * as BoostEntity from '@/gameobjects/Boost'
 import * as FlipEntity from '@/gameobjects/FlipEffect'
 import * as ExplodeEntity from '@/gameobjects/Explosion'
 import * as Audio from '@/core/Audio'
+import * as VelocityEffect from '@/gameobjects/VelocityEffect'
 
 const MAX_VELOCITY = 400
 
@@ -57,7 +58,8 @@ const doFlip = c_(
     FlipEntity.create(stage, entity) |> Stage.addEntity(stage)
     const bonus = _.toLerp(100, 400, stage._state.playerVelocity) |> _.lerp(0.05, 0.2)
     stage._state.$commit({
-      score: stage._state.score + (stage._state.score*bonus)
+      score: stage._state.score + (stage._state.score*bonus),
+      flips: stage._state.flips + 1
     })
     return entity
   }
@@ -67,6 +69,7 @@ const doFlip = c_(
 const update = c_(
   (stage, entity) => entity.input(entity) 
     |> checkFlipBonus
+    |> checkVelocityEffect(stage)
     |> bounceOffWall(stage)
     |> bounceOffRoof(stage)
     |> Physics.clampVelocity(MAX_VELOCITY) // todo maybe be physics prop
@@ -147,6 +150,15 @@ const bounceOffRoof = c_(
 // checkFlipBonus :: Spaceship -> Spaceship
 const checkFlipBonus = entity => gotFlipBonus(entity) ? emitBonus(entity) : entity
 
+const checkVelocityEffect = c_(
+  (stage, entity) => {
+    if (V2.magnitude(entity.velocity) > 380) {
+      VelocityEffect.create(stage, entity) |> Stage.addEntity(stage)
+    }
+    return entity
+  } 
+)
+
 // gotFlipBonus :: Spaceship -> Boolean
 const gotFlipBonus = entity => Math.abs(entity.rotationSinceAcceleration) >= 360
 
@@ -184,7 +196,10 @@ export const Rotate = c_(
     const rotation = dir * entity.state.rotateSpeed * _.delta(stage.game)
     return _.merge(entity, {
       angle: entity.angle + rotation,
-      rotationSinceAcceleration: entity.rotationSinceAcceleration + rotation
+      rotationSinceAcceleration: 
+        ( (rotation < 0 && entity.rotationSinceAcceleration < 0) || (rotation > 0 && entity.rotationSinceAcceleration > 0))
+          ? entity.rotationSinceAcceleration + rotation
+          : rotation
     })
   }
 )
@@ -193,6 +208,7 @@ export const Rotate = c_(
 export const Boost = c_(
   (stage, entity) => {
     Audio.play("boost")
+    stage._state.$commit({ jumps: stage._state.jumps + 1})
 
     return _.merge(entity.events(entity, Events.Boost), 
       {
@@ -225,7 +241,7 @@ export const Create = () => Entity.model({
     // Physics
     physicsEnabled: true,
     bodyRadius: 8,
-    collisionGroup: Physics.CollisionGroups.Spaceship,
+    collisionGroup: Physics.CollisionGroups.Player,
     collisions: collisions(),
     gravity: true,
 

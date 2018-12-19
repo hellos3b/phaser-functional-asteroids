@@ -4,7 +4,7 @@ export const model = (props) => _.Model({
   count   : () => {},
   current : 0,
   loop    : false,
-  done    : () => {}
+  done    : (/*stage*/) => {}
 })(props)
 
 
@@ -14,8 +14,8 @@ export const model = (props) => _.Model({
 export const updateAll = c_(
   (stage, timers) => 
     timers
-      |> _.map(updateTimer(_.delta(stage.game, 1)))
       |> _.filter(timerShouldContinue)
+      |> _.map(updateTimer(_.delta(stage.game, 1)))
 )
 
 /*

@@ -35,6 +35,13 @@ export const onKeyDown = c_(
       : entity
 )
 
+export const onKeyAny = c_(
+  (callback, entity) => 
+    Object.entries(state).find( ([key, value]) => value === true)
+    ? callback(entity)
+    : entity
+)
+
 const setKeyDown = e => {
   e.preventDefault()
   if (state.hasOwnProperty(e.keyCode)) {

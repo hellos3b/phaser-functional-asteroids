@@ -35,30 +35,6 @@ const cssLoader = {
   ]
 }
 
-// Expose PIXI and p2 so Phaser can use them from window.
-const exposePhaser = {
-  test: /phaser-space\.js$/,
-  use: [{
-    loader: 'expose-loader',
-    options: 'Phaser'
-  }]    
-}
-const exposePIXI = {
-  test: /pixi\.js$/,
-  use: [{
-    loader: 'expose-loader',
-    options: 'PIXI'
-  }]    
-}
-
-const exposeP2 = {
-  test: /p2\.js$/,
-  use: [{
-    loader: 'expose-loader',
-    options: 'p2'
-  }]    
-}
-
 const fontLoader = {
   test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
   use: [{
@@ -112,9 +88,10 @@ module.exports = {
       jsLoader,
       htmlLoader,
       cssLoader,
-      exposePhaser,
-      exposePIXI,
-      exposeP2,
+      // loadPhaser,
+      // loadPIXI,
+      // exposePIXI,
+      // exposeP2,
       fontLoader
     ]
   },
@@ -127,10 +104,7 @@ module.exports = {
   ],
   resolve: {
     alias: {
-      // 'phaser': path.join(phaserModule, 'build/custom/phaser-split.js'),
-      'phaser': path.join(__root, 'src/lib/phaser-space.js'),
-      'pixi': path.join(phaserModule, 'build/custom/pixi.js'),
-      // 'p2': path.join(phaserModule, 'build/custom/p2.js'),
+      'phaser': path.join(__root, 'src/lib/phaser-custom.js'),
       '@': path.join(__root, 'src')
     }
   }

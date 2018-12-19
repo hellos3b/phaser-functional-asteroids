@@ -9,7 +9,7 @@ export const spaceship = {
     path: 'assets/sprites/spaceship.png',
     width: 32,
     height: 32,
-    frames: 18
+    frames: 24
 }
 
 export const explosion = {

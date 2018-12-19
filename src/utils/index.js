@@ -178,8 +178,8 @@ export const toLerp = c_(
 
 export const lerp = c_(
   (min, max, amt) => {
-    amt = amt > 1 ? max : amt
-    amt = amt < 0 ? min : amt
+    amt = amt > 1 ? 1 : amt
+    amt = amt < 0 ? 0 : amt
     const diff = amt * (max - min)
     return min+diff
   }
