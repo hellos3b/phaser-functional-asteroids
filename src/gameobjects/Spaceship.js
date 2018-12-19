@@ -12,6 +12,7 @@ import * as VelocityEffect from '@/gameobjects/VelocityEffect'
 import * as Entity from '@/core/Entity'
 
 const MAX_VELOCITY = 400
+const VELOCITY_EFFECT = 380
 const BOOST_OFFSET = 16
 
 export const Events = {
@@ -59,14 +60,14 @@ export const Create = (opt={}) => {
 
 Stage.register("Spaceship", Create)
 
-// update :: (Phaser.State, Spaceship) -> Spaceship
+// update :: Spaceship -> Spaceship
 const update = entity => entity.input(entity) 
   |> Physics.bounceWalls
   |> Physics.bounceOffCeiling
   |> Physics.clampVelocity(MAX_VELOCITY)
   |> dieIfGrounded
   |> checkFlipBonus
-  // |> checkVelocityEffect(stage)
+  |> checkVelocityEffect
   // |> updateGameVelocity(stage)
 
 /*
@@ -104,8 +105,7 @@ export const Rotate = dir => entity => {
   const rotation = dir * entity.rotateSpeed * _.delta(entity.stage.game)
   return entity.$commit({
     angle: entity.angle + rotation,
-    flipRotation: 
-      ((rotation < 0 && entity.flipRotation < 0) || (rotation > 0 && entity.flipRotation > 0))
+    flipRotation: ((rotation < 0 && entity.flipRotation < 0) || (rotation > 0 && entity.flipRotation > 0))
         ? entity.flipRotation + rotation
         : rotation
   })
@@ -185,3 +185,11 @@ const emitBonus = entity => {
   entity.emit(Events.FlipBonus)
   return entity.$commit({ flipRotation: 0 })
 }
+
+const checkVelocityEffect = entity => {
+  if (V2.magnitude(entity.velocity) > VELOCITY_EFFECT) {
+    Stage.create("VelocityEffect", { position: entity.position, angle: entity.angle })
+      |> Stage.addEntity(entity.stage)
+  }
+  return entity
+} 
