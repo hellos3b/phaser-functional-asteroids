@@ -1,49 +1,21 @@
 import {c_,pipe} from '@/utils/functional'
 import {SpriteObject} from '@/core/SpriteObject'
 import * as _ from '../utils'
+import { Maybe } from '../utils/functional';
 
-/* 
-  createSprite :: (Phaser.Game, Entity) -> Sprite
-*/
-export const createSprite = c_(
-  (game, entity) => new SpriteObject(game, entity)
+// entities :: Map<String, Entity>
+let Entities = {}
+
+export const create = c_(
+  (name, options) => 
+    Maybe(Entities[name]).getOrThrow(`No Entity found with name: '${name}`)
+      |> (apply => apply(options))
 )
 
-/* 
-  addToScene :: (Phaser.Game, Sprite) -> Sprite
-*/
-export const addToScene = c_(
-  (game, sprite) => {
-    game.add.existing(sprite)
-    return sprite
-  }
+export const register = c_(
+  (name, fn) => Entities[name] = fn
 )
 
-/* 
-  addToGroup :: (Phaser.State, Sprite) -> Sprite
-*/
-export const addToGroup = c_(
-  (stage, sprite) => {
-    const name = sprite.state.group ||
-      sprite.state.collisionGroup ||
-      "default"
-
-    stage.groups[name].add(sprite)
-    return sprite
-  }
-)
-
-/* 
-  spawn :: (Phaser.State, Entity) -> Entity
-*/
-export const spawn = c_(
-  (stage, entity) => _.merge(
-    entity, {
-      sprite: entity |> createSprite(stage.game)
-        |> addToScene(stage.game)
-        |> addToGroup(stage)
-    })
-)
 
 /* 
   centerPosition :: Phaser.World -> Object
@@ -53,17 +25,33 @@ export const centerPosition = world => ({
   y: world.centerY
 })
 
+// addToScene :: (Phaser.Game, Sprite) -> Sprite
+export const addToScene = (game, sprite) => {
+  game.add.existing(sprite)
+  return sprite
+}
+
+// addToGroup :: (Phaser.State, Sprite) -> Sprite
+export const addToGroup = (stage, sprite) => {
+  const name = sprite.state.group ||
+    sprite.state.collisionGroup ||
+    "default"
+
+  stage.$groups[name].add(sprite)
+  return sprite
+}
+
 /* 
   addEntity :: (Phaser.State, Entity) -> Entity
 */
 export const addEntity = c_(
   (stage, entity) => {
-    const spawnQueue = _.push(
-      stage._state.spawnQueue,
-      entity
-    )	
+    entity.$spawn(stage) 
 
-    stage._state.$commit({ spawnQueue })
+    stage.$state.$commit({ 
+      gameObjects: _.push(stage.$state.gameObjects, entity)
+    })
+
     return entity
   }
 )

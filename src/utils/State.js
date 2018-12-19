@@ -1,75 +1,3 @@
-/*
-    Maybe
-    Wraps a nullable value
-*/
-export const Maybe = function(T) {
-  return {
-    apply: (fn) => T && fn(T),
-    get: () => T,
-    getOrElse: (option) =>
-      (T === undefined) ? option : T,
-    getOrThrow: (msg) => {
-      if (T === undefined)  {
-        throw new Error(msg)
-      } else {
-        return T
-      }
-    }
-  }
-}
-
-/*
-    pipe
-    Creates a function that runs a chain of functions
-    ex: 
-        const fn = pipe(fn1, fn2, fn3)
-        fn(5)
-        -- will pass in 5 to fn1, then pass the result to fn2, then pass that result to fn3, and return the value
-*/
-export const pipe = (f1, ...fns) => (...args) => {
-  return fns.reduce((res, fn) => fn(res), f1.apply(null,args))
-}
-
-export const stream = function(stream, callback) {
-  if (!stream.subscribe) throw new Error("Trying to stream a non Streamable")
-  stream.subscribe(callback)
-}
-
-/*
-    c_
-    Allows you to run functions by either arguments or curried
-    (basically, wrap every function with this to make life easier)
-    ex: 
-        const add = curry( (a, b) => a + b )
-        add(1, 2)
-        add(1)(2)
-  
-        - other usage:
-        const addTwo = add(2)
-        const b = addTwo(5)
-  
-    Used for being able to break functions down into one argument
-*/
-export const c_ = function (fn) {
-  const arity = fn.length
-
-  function given(argsSoFar) {
-    return function helper() {
-      const updatedArgsSoFar = [...argsSoFar, ...arguments]
-      return (updatedArgsSoFar.length >= arity) ? fn.apply(this, updatedArgsSoFar) : given(updatedArgsSoFar);
-    }
-  }
-
-  return given([]);
-}
-
-
-export const log = c_(
-  (str, val) => {
-    console.log(str, val)
-    return val
-  }
-)
 
 /*
     OldState
@@ -113,7 +41,7 @@ const objEquals = c_(
         state.$dirty
         - []
 */
-export const State = function (initialState) {
+const State = function (initialState) {
   // Keep track of which values are set to 'dirty'
   // It's a set instead of an array because we only care if the values been changed once
   let dirty = new Set([])
@@ -123,7 +51,7 @@ export const State = function (initialState) {
     .reduce((res, [key, value]) => {
       return {
         ...res,
-        [key]: isObject(value) ? State(value) : value
+        [key]: value
       }
     }, {})
 
@@ -163,7 +91,7 @@ export const State = function (initialState) {
         oldState[prop] = target[prop]
       }
 
-      target[prop] = isObject(value) ? State(value) : value
+      target[prop] = value
 
       return true
     }
@@ -172,13 +100,4 @@ export const State = function (initialState) {
   return new Proxy(state, handler)
 }
 
-export const Commit = c_(
-  (target, value) => {
-    target = value
-  }
-)
-
-
-// useful for debugging
-window.c_ = c_
-
+export default State
