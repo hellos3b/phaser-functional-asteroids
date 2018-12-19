@@ -9,9 +9,10 @@ import * as FlipEntity from '@/gameobjects/FlipEffect'
 import * as ExplodeEntity from '@/gameobjects/Explosion'
 import * as Audio from '@/core/Audio'
 import * as VelocityEffect from '@/gameobjects/VelocityEffect'
-import Entity from '@/core/Entity'
+import * as Entity from '@/core/Entity'
 
 const MAX_VELOCITY = 400
+const BOOST_OFFSET = 16
 
 export const Events = {
   Boost: "boost",
@@ -29,6 +30,10 @@ export const Create = (opt={}) => {
     // methods
     update  : update,
     input   : inputController,
+    events  : {
+      [Events.Boost]: onBoost,
+      [Events.FlipBonus]: onFlipBonus
+    },
     
     // sprite
     asset       : 'spaceship',
@@ -49,7 +54,7 @@ export const Create = (opt={}) => {
     gravity         : true,
   }, opt)
 
-  return new Entity(props)
+  return new Entity.Entity(props)
 }
 
 Stage.register("Spaceship", Create)
@@ -59,9 +64,9 @@ const update = entity => entity.input(entity)
   |> Physics.bounceWalls
   |> Physics.bounceOffCeiling
   |> Physics.clampVelocity(MAX_VELOCITY)
-  // |> checkFlipBonus
+  |> dieIfGrounded
+  |> checkFlipBonus
   // |> checkVelocityEffect(stage)
-  // |> checkBottomCrash(stage)
   // |> updateGameVelocity(stage)
 
 /*
@@ -117,4 +122,66 @@ export const Boost = entity => {
       |> V2.multiply(-entity.thrustSpeed * 25 * _.delta(entity.stage.game))
       |> V2.add(entity.velocity)
   })
+}
+
+/*
+   Event Listeners
+*/
+const onBoost = entity => {
+  Stage.create("Boost", { position: getBoostPosition(entity) }) |> Stage.addEntity(entity.stage)
+  return entity
+}
+
+const onFlipBonus = entity => {
+  Stage.create("Flip", { 
+    position: entity.position,
+    angle: entity.angle 
+  }) |> Stage.addEntity(entity.stage)
+
+  // todo: not here tho
+  const bonus = _.toLerp(100, 400, V2.magnitude(entity.velocity)) |> _.lerp(0.05, 0.2)
+
+  // todo: can hook in Game?
+  entity.stage.$state.$commit({
+    score: entity.stage.$state.score + (entity.stage.$state.score*bonus),
+    flips: entity.stage.$state.flips + 1
+  })
+  return entity
+}
+
+const getBoostPosition = entity =>  
+  V2.fromAngle(entity.angle)
+    |> V2.multiply(BOOST_OFFSET)
+    |> V2.add(entity.position)
+
+/*
+
+*/
+const dieIfGrounded = entity => 
+  entity.position.y < entity.stage.game.height 
+    ? entity 
+    : explode(entity)
+
+const explode = entity => {
+  Stage.create("Explosion", { position: entity.position }) |> Stage.addEntity(entity.stage)
+
+  // update states
+  entity.emit(Events.Die)
+  entity.stage.$state.$commit({ end: true })
+  return Entity.die(entity)
+}
+
+// checkFlipBonus :: Spaceship -> Spaceship
+const checkFlipBonus = entity => 
+  gotFlipBonus(entity) 
+    ? emitBonus(entity) 
+    : entity
+
+// gotFlipBonus :: Spaceship -> Boolean
+const gotFlipBonus = entity => Math.abs(entity.flipRotation) >= 360
+
+// emitBonus :: Spaceship -> Spaceship
+const emitBonus = entity => {
+  entity.emit(Events.FlipBonus)
+  return entity.$commit({ flipRotation: 0 })
 }

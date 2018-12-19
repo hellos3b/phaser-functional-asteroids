@@ -159,15 +159,6 @@ const checkVelocityEffect = c_(
   } 
 )
 
-// gotFlipBonus :: Spaceship -> Boolean
-const gotFlipBonus = entity => Math.abs(entity.rotationSinceAcceleration) >= 360
-
-// emitBonus :: Spaceship -> Spaceship
-const emitBonus = entity => 
-  _.merge( entity.events(entity, Events.FlipBonus), {
-      rotationSinceAcceleration: 0
-    })
-
 
 // StopAccelerating :: Spaceship -> Spaceship
 export const StopAccelerating = entity => _.merge(entity, {

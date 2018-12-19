@@ -81,7 +81,7 @@ const loadAnimation = c_(
 )
 
 const emitEvent = c_(
-  (sprite, event) => sprite.eventQueue = _.push(sprite.eventQueue, event)
+  (sprite, event) => sprite.emit(event)
 )
 
 /* 
@@ -117,7 +117,7 @@ const updateProperty = c_(
 */
 export class Sprite extends Phaser.Sprite {
 
-  constructor (game, props) {
+  constructor (entity, game, props) {
     super(
       game, 
       props.position.x, 
@@ -125,9 +125,9 @@ export class Sprite extends Phaser.Sprite {
       props.asset
     )
 
+    this.entity = entity
     this.id = spriteIds++
     this.game = game
-    this.eventQueue = []
     const state = this.state = new State(props)
 
     // this is to prevent race conditions of other properties
@@ -141,10 +141,8 @@ export class Sprite extends Phaser.Sprite {
     this.commit(state, Object.keys(state))
   }
 
-  getEventQueue() {
-    const eventQueue = this.eventQueue
-    this.eventQueue = []
-    return eventQueue
+  emit(event) {
+    this.entity.emit(event)
   }
 
   commit(state, keys) {

@@ -27,7 +27,7 @@ const defaultProps = () => ({
   angVelocity     : 0
 })
 
-export default class {
+export class Entity {
   constructor(props) {
     this.state = new State({
       ...defaultProps(), 
@@ -37,6 +37,10 @@ export default class {
     this.sprite = null
 
     loadProps(this, this.state)
+  }
+
+  create(/*entity*/) {
+
   }
 
   update(/*entity*/) {
@@ -54,9 +58,12 @@ export default class {
 
   $spawn(stage) {
     this.stage = stage
-    this.sprite = new Sprite(stage.game, this.state)
+    this.sprite = new Sprite(this, stage.game, this.state)
     Stage.addToScene(stage.game, this.sprite)
     Stage.addToGroup(stage, this.sprite)
+
+    this.create(this)
+    return this
   }
 
   $commit(props) {
@@ -90,3 +97,4 @@ export const commitToSprite = entity => {
 }
 
 export const dead = e => !e.alive
+export const die = e => e.$commit({ alive: false })

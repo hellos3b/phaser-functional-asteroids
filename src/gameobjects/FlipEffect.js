@@ -1,52 +1,39 @@
-import * as Entity from '@/models/Entity'
-import { pipe } from '@/utils/functional'
 import * as _ from '@/utils'
-import * as V2 from '@/utils/Vector2'
-import * as EventManager from '@/core/Events'
+import * as Stage from '@/core/Stage'
+import * as Audio from '@/core/Audio'
+import * as Entity from '@/core/Entity'
 
 export const Events = {
   onDone: "done"
 }
 
-export const Create = () => Entity.model({
-  alive: true,
-  group: "default",
-  position: {
-    x: 100,
-    y: 100
-  },
-  frame: 0,
-  anchor: {
-    x: 0.5,
-    y: 0.5
-  },
-  asset: 'spaceship',
-  animations: {
-    flip: {
-      frames: [12, 13, 14, 15],
-      fps: 10,
-      onDone: Events.onDone
-    }
-  },
-  animation: "flip",
-})
+export const Create = (opt={}) => {
+  const props = Object.assign({
+    // methods
+    create: create,
+    events: {
+      [Events.onDone]: Entity.die
+    },
 
-/*
-  BoostEvents :: () -> Map(String, Function)
-*/
-const FlipEvents = () => ({
-  [Events.onDone]: (stage, entity) => Entity.die(entity)
-})
+    // sprite
+    asset       : 'spaceship',
+    group       : 'default',
+    frame       : 0,
+    animations  : {
+      play      : {
+        frames  : [12, 13, 14, 15],
+        fps     : 20,
+        onDone  : Events.onDone
+      }
+    },
+    animation: 'play'
+  }, opt)
 
-/*
-  create :: (Phaser.State, Spaceship) -> Boost
-*/
-export const create = c_(
-  (stage, target) => 
-    _.merge(
-      Create(), {
-        position: target.position,
-        angle: target.angle,
-        events: EventManager.Events(stage, FlipEvents())
-      })
-)
+  return new Entity.Entity(props)
+}
+
+Stage.register("Flip", Create)
+
+const create = entity => {
+  Audio.play("flip")
+}

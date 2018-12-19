@@ -1,51 +1,40 @@
-import * as Entity from '@/models/Entity'
-import { pipe } from '@/utils/functional'
 import * as _ from '@/utils'
-import * as V2 from '@/utils/Vector2'
-import * as EventManager from '@/core/Events'
+import * as Stage from '@/core/Stage'
+import * as Entity from '@/core/Entity'
+import * as Audio from '@/core/Audio'
 
 export const Events = {
   onDone: "done"
 }
 
-export const Create = () => Entity.model({
-  alive: true,
-  group: "default",
-  position: {
-    x: 100,
-    y: 100
-  },
-  frame: 0,
-  anchor: {
-    x: 0.5,
-    y: 0.5
-  },
-  asset: 'explosion',
-  animations: {
-    play: {
-      frames: [0, 1, 2, 3],
-      fps: 10,
-      onDone: Events.onDone
-    }
-  },
-  animation: "play",
-})
+export const Create = (opt={}) => {
+  const props = Object.assign({
+    // methods
+    create: create,
+    events: {
+      [Events.onDone]: Entity.die
+    },
 
-/*
-  BoostEvents :: () -> Map(String, Function)
-*/
-const ExplodeEvents = () => ({
-  [Events.onDone]: (stage, entity) => Entity.die(entity)
-})
+    // sprite
+    asset       : 'explosion',
+    group       : 'default',
+    frame       : 0,
+    animations  : {
+      play      : {
+        frames  : [0, 1, 2, 3],
+        fps     : 20,
+        onDone  : Events.onDone
+      }
+    },
+    animation: 'play'
+  }, opt)
 
-/*
-  create :: (Phaser.State, Spaceship) -> Boost
-*/
-export const create = c_(
-  (stage, target) => 
-    _.merge(
-      Create(), {
-        position: target.position,
-        events: EventManager.Events(stage, ExplodeEvents())
-      })
-)
+  return new Entity.Entity(props)
+}
+
+Stage.register("Explosion", Create)
+
+const create = entity => {
+  Audio.play("dead")
+  entity.stage.game.camera.shake(0.04, 120)
+}

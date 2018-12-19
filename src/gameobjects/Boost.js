@@ -1,62 +1,37 @@
-import * as Entity from '@/models/Entity'
-import { pipe } from '@/utils/functional'
 import * as _ from '@/utils'
-import * as V2 from '@/utils/Vector2'
-import * as EventManager from '@/core/Events'
+import * as Stage from '@/core/Stage'
+import * as Entity from '@/core/Entity'
+import * as Audio from '@/core/Audio'
 
 export const Events = {
   onDone: "done"
 }
 
-export const Create = () => Entity.model({
-  alive: true,
-  group: "default",
-  position: {
-    x: 100,
-    y: 100
-  },
-  frame: 0,
-  anchor: {
-    x: 0.5,
-    y: 0.5
-  },
-  asset: 'spaceship',
-  animations: {
-    play: {
-      frames: [6, 7, 8, 9],
-      fps: 20,
-      onDone: Events.onDone
-    }
-  },
-  animation: "play",
-})
+export const Create = (opt={}) => {
+  const props = Object.assign({
+    // methods
+    create: create,
+    events: {
+      [Events.onDone]: Entity.die
+    },
 
-const SPAWN_OFFSET = 16
+    // sprite
+    asset       : 'spaceship',
+    group       : 'default',
+    frame       : 0,
+    animations  : {
+      play      : {
+        frames  : [6, 7, 8, 9],
+        fps     : 20,
+        onDone  : Events.onDone
+      }
+    },
+    animation: 'play'
+  }, opt)
 
-/*
-  getPosition :: Spaceship -> Object
-*/
-export const getPosition = spaceship => pipe(
-    V2.fromAngle,
-    V2.multiply(SPAWN_OFFSET),
-    V2.add(spaceship.position)
-  )(spaceship.angle)
+  return new Entity.Entity(props)
+}
 
-/*
-  BoostEvents :: () -> Map(String, Function)
-*/
-const BoostEvents = () => ({
-  [Events.onDone]: (stage, entity) => Entity.die(entity)
-})
+Stage.register("Boost", Create)
 
-/*
-  create :: (Phaser.State, Spaceship) -> Boost
-*/
-export const create = c_(
-  (stage, target) => 
-    _.merge(
-      Create(), {
-        position: getPosition(target),
-        events: EventManager.Events(stage, BoostEvents())
-      })
-)
+const create = entity => entity.stage.game.camera.shake(0.01, 60)
