@@ -5,8 +5,9 @@ import * as _ from '@/utils'
 export const GRAVITY = { x: 0, y: -150 }
 
 export const CollisionGroups = {
-  Player: "player",
-  Asteroid: "asteroid"
+  Player  : "player",
+  Asteroid: "asteroid",
+  Pickup  : "pickup"
 }
 
 export const apply = c_(

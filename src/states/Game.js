@@ -7,6 +7,7 @@ import { Groups } from '@/core/Groups'
 import { State, pipe, stream, log } from '@/utils/functional'
 
 import * as Asteroid from '@/gameobjects/Asteroid'
+import * as Pickup from '@/gameobjects/Pickup'
 import * as Spaceship from '@/gameobjects/Spaceship'
 import * as Entity from '@/core/Entity'
 import * as Boost from '@/gameobjects/Boost'
@@ -33,6 +34,7 @@ const States = {
   Initialize references 
 */
 const init = (stage, options) => {
+  stage.stage.backgroundColor = config.BACKGROUND_COLOR
   stage.$refs = {}
   stage.$state = new State(GameState.model(options))
   stage.$groups = new Groups(
@@ -59,6 +61,7 @@ const create = stage => {
 const start = stage => {
   Audio.loop("gameOST")
   startAsteroidTimer(stage)
+  // startPickupTimer(stage)
 }
 
 const update = stage => {
@@ -109,6 +112,20 @@ const startAsteroidTimer = stage => {
   }) |> Stage.addTimer(stage)
 }
 
+const startPickupTimer = stage => {
+  Timer.create({
+    count : () => 2,
+    loop  : true,
+    done  : () => createPickup(stage)
+  }) |> Stage.addTimer(stage)
+}
+
+// createAsteroid :: Phaser.State -> None
+const createPickup = stage => {
+  Stage.create("Pickup", Pickup.randomize(stage))
+    |> Stage.addEntity(stage)
+}
+
 // createAsteroid :: Phaser.State -> None
 const createAsteroid = stage => {
   Stage.create("Asteroid", Asteroid.randomize(stage))
@@ -129,7 +146,7 @@ const onPlayerDie = entity => {
 
 const addScore = stage => 
   stage.$state.score
-    + stage.$state.elapsedTime
+    + (stage.$state.flips + 1)
     * (UI.getCurrentBonus(stage) + 1)
     * _.delta(stage.game) 
 

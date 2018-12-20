@@ -3,4 +3,4 @@ export const GAME_HEIGHT = 480
 export const LOCAL_STORAGE_NAME = 'phaseres6webpack'
 
 
-export const BACKGROUND_COLOR = "#0e0a17"
+export const BACKGROUND_COLOR = "#111d38"
