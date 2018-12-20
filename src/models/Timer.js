@@ -1,16 +1,15 @@
 import * as _ from "@/utils"
 
-export const model = (props) => _.Model({
+export const create = props => ({
   count   : () => {},
   current : 0,
   loop    : false,
-  done    : (/*stage*/) => {}
-})(props)
+  done    : (/*stage*/) => {},
+  ...props
+})
 
 
-/*
-  updateAll :: (Phaser.State, [Timer]) -> [Timer]
-*/
+// updateAll :: (Phaser.State, [Timer]) -> [Timer]
 export const updateAll = c_(
   (stage, timers) => 
     timers
@@ -18,30 +17,22 @@ export const updateAll = c_(
       |> _.map(updateTimer(_.delta(stage.game, 1)))
 )
 
-/*
-  updateTimer :: (Float, Timer) -> Timer
-*/
+// updateTimer :: (Float, Timer) -> Timer
 const updateTimer = c_(
   (delta, timer) => timer |> addTime(delta) |> emitIfDone
 )
 
-/*
-  timerShouldContinue :: Timer -> Boolean
-*/
+// timerShouldContinue :: Timer -> Boolean
 const timerShouldContinue = timer => timer.loop || timer.current < timer.count()
 
-/*
-  addTimer :: (Float, Timer) -> Timer
-*/
+// addTimer :: (Float, Timer) -> Timer
 const addTime = c_(
   (delta, timer) => _.merge(timer, {
     current: timer.current + delta
   })
 )
 
-/*
-  emitIfDone :: Timer -> Timer
-*/
+// emitIfDone :: Timer -> Timer
 const emitIfDone = timer => {
   if (timer.current >= timer.count()) {
     timer.done()

@@ -1,7 +1,7 @@
 import {c_,pipe} from '@/utils/functional'
 import {SpriteObject} from '@/core/SpriteObject'
 import * as _ from '../utils'
-import { Maybe } from '../utils/functional';
+import { Maybe } from '../utils/functional'
 
 // entities :: Map<String, Entity>
 let Entities = {}
@@ -53,5 +53,15 @@ export const addEntity = c_(
     })
 
     return entity
+  }
+)
+
+export const addTimer = c_(
+  (stage, timer) => {
+    stage.$state.$commit({
+      timers: _.push(stage.$state.timers, timer)
+    })
+
+    return timer
   }
 )

@@ -9,7 +9,6 @@ export const model = _.Model({
   bonus       : 0,
   score       : 0,
   elapsedTime : 1,
-  playerVelocity: 1,
   gameObjects : [],
   spawnQueue  : [],
   timers      : []

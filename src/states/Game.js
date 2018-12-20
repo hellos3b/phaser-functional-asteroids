@@ -8,7 +8,7 @@ import { State, pipe, stream, log } from '@/utils/functional'
 
 import * as Asteroid from '@/gameobjects/Asteroid'
 import * as Spaceship from '@/gameobjects/Spaceship'
-import * as Entity from '@/models/Entity'
+import * as Entity from '@/core/Entity'
 import * as Boost from '@/gameobjects/Boost'
 import * as EventManager from '@/core/Events'
 import * as Sounds from '@/config/sounds'
@@ -19,9 +19,15 @@ import * as Styles from '@/config/styles'
 import * as config from '@/config/game'
 import * as Physics from '@/core/Physics'
 import * as GameState from '@/models/GameState'
-import * as Engine from '@/core/Engine'
+import * as UI from '@/game/UI'
 
 const SPEED_BONUS = 20
+
+const States = {
+  BEGIN : "begin",
+  GAME  : "game",
+  END   : "end"
+}
 
 /*
   Initialize references 
@@ -39,40 +45,95 @@ const init = (stage, options) => {
 
 const create = stage => {
   stage.$refs.player = Stage.create("Spaceship", {
-    position: Stage.centerPosition(stage.world)
+    position: Stage.centerPosition(stage.world),
+    events: {  
+      [Spaceship.Events.Die]: onPlayerDie
+    }
   }) |> Stage.addEntity(stage)
+
+  UI.create(stage)
+
+  start(stage)
+}
+
+const start = stage => {
+  Audio.loop("gameOST")
+  startAsteroidTimer(stage)
 }
 
 const update = stage => {
+  if (stage.$state.end) {
+    Input.onKeyDown(Input.Keys.Restart, () => restartStage(stage), {})
+  }
+
   nextState(stage) |> stage.$state.$commit
   Input.clear()
+  UI.update(stage)
 }
 
 // nextState :: (Phaser.State, GameState) -> GameState
 const nextState = stage => {
-  // if (state.started) {
-    const state = stage.$state
+  const state = stage.$state
 
-    // Timer.updateAll(stage)(state.timers)
-    Engine.updateEntities(stage)
-
-    state.elapsedTime = !state.end ? state.elapsedTime + _.delta(stage.game, 1) : state.elapsedTime
-    state.score = !state.end ? addScore(stage) : state.score
-
-    // state.timers = 
-  // }
+  Timer.updateAll(stage)(stage.$state.timers)
+  updateEntities(stage)
 
   stage.$state.$commit({
-    gameObjects: _.filter(Entity.dead, stage.$state.gameObjects),
+    gameObjects: _.filter(Entity.stillAlive, state.gameObjects),
     elapsedTime: !state.end ? state.elapsedTime + _.delta(stage.game, 1) : state.elapsedTime,
-    score: !state.end ? addScore(stage) : stage.$state.score
+    score: !state.end ? addScore(stage) : state.score
   })
 
   return state
 }
 
-const addScore = ({$state, game}) => $state.score + _.delta(game, 1)*$state.elapsedTime*(getBonus($state) + 1)
-const getBonus = state => _.toLerp(100, 400, state.playerVelocity) |> _.lerp(0, SPEED_BONUS)
+// updateEntities :: Phaser.State -> None
+const updateEntities = stage => 
+  stage.$state.gameObjects
+    |> _.filter(Entity.spawned)
+    |> _.each(updateEntity)
+
+// updateEntity :: Entity -> Entity
+const updateEntity = entity => entity
+  |> (e => e.update(e))
+  |> _.has("physicsEnabled") (Physics.apply(_.delta(entity.stage.game)))
+  |> _.has("physicsEnabled") (Physics.testCollisions)
+  |> Entity.commitToSprite
+
+// startAsteroidTimer :: Phaser.State -> None
+const startAsteroidTimer = stage => {
+  Timer.create({
+    count : () => getAsteroidRate(stage),
+    loop  : true,
+    done  : () => createAsteroid(stage)
+  }) |> Stage.addTimer(stage)
+}
+
+// createAsteroid :: Phaser.State -> None
+const createAsteroid = stage => {
+  Stage.create("Asteroid", Asteroid.randomize(stage))
+    |> Stage.addEntity(stage)
+}
+
+// getAsteroidRate :: Phaser.State -> float
+// Returns in ms how often an asteroid should spawn (based on elapsed time)
+const getAsteroidRate = stage => 
+  _.toLerp(0, 60, stage.$state.elapsedTime)  
+    |> _.ilerp(1, 0.15)
+
+const onPlayerDie = entity => {
+  Audio.stop("gameOST")
+  UI.showFinalScore(entity.stage)
+  entity.stage.$state.$commit({ end: true })
+}
+
+const addScore = stage => 
+  stage.$state.score
+    + stage.$state.elapsedTime
+    * (UI.getCurrentBonus(stage) + 1)
+    * _.delta(stage.game) 
+
+const restartStage = stage => stage.state.start('Game')
 
 // Need to use function instead of arrows so we don't scope it to window lol
 export const Game = { 

@@ -8,6 +8,10 @@ const defaultProps = () => ({
   alive       : true,
   events      : {},
 
+  // methods
+  update      : entity => entity,
+  create      : () => {},
+
   asset       : '',
   frame       : 0,
   position    : { x: 0, y: 0 },
@@ -17,7 +21,7 @@ const defaultProps = () => ({
   angle       : 0,
 
   // physics
-  // todo: component? :thonk:
+  // todo: physics component? :thonk:
   physicsEnabled  : false,
   bodyRadius      : 8,
   collisionGroup  : -1,
@@ -37,14 +41,6 @@ export class Entity {
     this.sprite = null
 
     loadProps(this, this.state)
-  }
-
-  create(/*entity*/) {
-
-  }
-
-  update(/*entity*/) {
-    return this
   }
 
   emit(event) {
@@ -72,12 +68,12 @@ export class Entity {
   }
 }
 
-// loadProps :: (Entity2, State) => None
+// loadProps :: (Entity, State) -> None
 //  loads passed in props as getters on the object
 const loadProps = (ref, state) => 
   _.each(propName => addProperty(ref, propName), Object.keys(state))
 
-// addProperty :: (Entity2, String) => None
+// addProperty :: (Entity, String) -> None
 const addProperty = (ref, name) => 
   Object.defineProperty(ref, name, {
     get() {
@@ -89,12 +85,13 @@ const addProperty = (ref, name) =>
     set(val) { throw new Error(`Object<Entity> is set to read-only > set '${name}' to '${val}'`) }
   })
 
-export const spawned = entity => !!entity.sprite 
-
+// commitToSprite :: Entity -> Entity
 export const commitToSprite = entity => {
   entity.sprite.commit(entity.state)
   return entity
 }
 
+export const spawned = entity => !!entity.sprite 
+export const stillAlive = e => e.alive
 export const dead = e => !e.alive
 export const die = e => e.$commit({ alive: false })

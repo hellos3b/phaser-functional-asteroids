@@ -4,6 +4,11 @@ import * as _ from '@/utils'
 
 export const GRAVITY = { x: 0, y: -150 }
 
+export const CollisionGroups = {
+  Player: "player",
+  Asteroid: "asteroid"
+}
+
 export const apply = c_(
   (delta, entity) => entity
       |> _.tr("gravity", incVelocity(GRAVITY, delta))
@@ -29,22 +34,20 @@ export const incVelocity = c_(
   })
 )
 
-export const testCollisions = c_(
-  (stage, entity) => Object.entries(entity.collisions)
-    |> _.map(overlap(stage, entity))
+export const testCollisions = entity => 
+  Object.entries(entity.collisions)
+    |> _.map(overlap(entity))
     |> _.merge(entity)
-)
-
 
 export const overlap = c_(
-  (stage, entity, [group, callback]) => _.map(sprite => {
-      if (stage.game.physics.arcade.overlap(entity.sprite, sprite)) {
-        console.log("collision", group, callback)
-        return callback(stage, entity, sprite)
-      } else {
-        return entity
-      }
-    }, stage.$groups[group].children) 
+  (entity, [group, callback]) => 
+    _.map(sprite => {
+        if (entity.stage.game.physics.arcade.overlap(entity.sprite, sprite)) {
+          return callback(entity, sprite)
+        } else {
+          return entity
+        }
+      }, entity.stage.$groups[group].children) 
     |> _.mergeDown
 )
 
@@ -62,11 +65,6 @@ export const rotate = c_(
     angle: entity.angle + entity.angVelocity * delta
   })
 )
-
-export const CollisionGroups = {
-  Player: "player",
-  Asteroid: "asteroid"
-}
 
 export const intersects = c_(
   (stateA, stateB) => V2.distance(stateA.position, stateB.position) <= stateA.collisionRadius || distance <= stateB.collisionRadius
@@ -91,12 +89,14 @@ export const bounceWalls = entity => {
   })
 }
 
-// inBoundsX :: (Phaser.State, Entity) -> Entity
+// inBoundsX :: Entity -> Boolean
 const inBoundsX = entity => entity.position.x > 0 && entity.position.x < entity.stage.game.width
+// inBoundsY :: Entity -> Boolean
 const inBoundsY = entity => entity.position.y > 0
 
-
-// export const testCollisions = c_(
-//   (stage, entities) =>
-//     entities.forEach(checkCollision(stage))
-// )
+// outOfBounds :: Entity -> Boolean
+export const outOfBounds = entity =>  
+  entity.position.x < -50 
+    || entity.position.x > entity.stage.game.width + 50
+    || entity.position.y < -50 
+    || entity.position.y > entity.stage.game.height + 50

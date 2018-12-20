@@ -20,9 +20,18 @@ export const Events = {
   Die: "died"
 }
 
-const collisions = () => {}
+const collisions = () => ({
+  [Physics.CollisionGroups.Asteroid]: onCollideAsteroid
+})
 
 export const Create = (opt={}) => {
+  // so events can be merged instead of overwritten
+  const events = {
+    [Events.Boost]: onBoost,
+    [Events.FlipBonus]: onFlipBonus,
+    ...(opt.events || {})
+  }
+
   const props = Object.assign({
     thrustSpeed : 400,
     rotateSpeed : 270,
@@ -31,10 +40,6 @@ export const Create = (opt={}) => {
     // methods
     update  : update,
     input   : inputController,
-    events  : {
-      [Events.Boost]: onBoost,
-      [Events.FlipBonus]: onFlipBonus
-    },
     
     // sprite
     asset       : 'spaceship',
@@ -53,7 +58,7 @@ export const Create = (opt={}) => {
     collisionGroup  : Physics.CollisionGroups.Player,
     collisions      : collisions(),
     gravity         : true,
-  }, opt)
+  }, opt, { events })
 
   return new Entity.Entity(props)
 }
@@ -149,10 +154,9 @@ const onFlipBonus = entity => {
   return entity
 }
 
-const getBoostPosition = entity =>  
-  V2.fromAngle(entity.angle)
-    |> V2.multiply(BOOST_OFFSET)
-    |> V2.add(entity.position)
+const onCollideAsteroid = c_(
+  (entity, target) => explode(entity)
+)
 
 /*
 
@@ -193,3 +197,8 @@ const checkVelocityEffect = entity => {
   }
   return entity
 } 
+
+const getBoostPosition = entity =>  
+  V2.fromAngle(entity.angle)
+    |> V2.multiply(BOOST_OFFSET)
+    |> V2.add(entity.position)
