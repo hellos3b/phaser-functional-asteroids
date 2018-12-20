@@ -37,6 +37,7 @@ const init = (stage, options) => {
   stage.stage.backgroundColor = config.BACKGROUND_COLOR
   stage.$refs = {}
   stage.$state = new State(GameState.model(options))
+  stage.$state.timers = []
   stage.$groups = new Groups(
     stage.game, 
     ["default", ...Object.values(Physics.CollisionGroups)]

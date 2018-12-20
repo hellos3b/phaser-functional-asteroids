@@ -1,7 +1,7 @@
 @import url(https://fonts.googleapis.com/css?family=Orbitron);
 @import url(https://fonts.googleapis.com/css?family=Staatliches);
 body {
-  background: #212b42;
+  background: #000;
 }
 body #content canvas {
   margin: 0 auto;
