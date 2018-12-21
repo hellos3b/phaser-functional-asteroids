@@ -69,7 +69,7 @@ module.exports = {
 
   output: {
     path: path.resolve(__root, 'dist'),
-    filename: '[name].js',
+    filename: '[name].[contenthash].js',
   },
 
   optimization: {

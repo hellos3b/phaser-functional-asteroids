@@ -36,7 +36,11 @@ export const promptName = () => {
     input.value = localStorage.getItem('name-pref')
     input.focus()
 
-    prompt.querySelector('.cancel').onclick = () => resolve(null)
+    prompt.querySelector('.cancel').onclick = () => {
+      prompt.classList.add('hide')
+      prompt.innerHTML = ""
+      resolve(null)
+    }
     prompt.querySelector('.submit').onclick = () => {
       if (input.value) {
         prompt.classList.add('hide')
