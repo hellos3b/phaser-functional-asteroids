@@ -10,6 +10,10 @@ body {
     }
 }
 
+.hide {
+    display: none;
+}
+
 #content {
     position: relative;
     width: 760px;
@@ -17,11 +21,10 @@ body {
 
     .overlay {
         position: absolute;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: #000;
+        top: 250px;
+        left: 20px;
+        right: 20px;
+        bottom: 20px;
     }
 
     .results {
@@ -61,6 +64,128 @@ body {
 
         &:hover {
             color: #7ec9f7;
+        }
+    }
+}
+
+.leaderboard-container {
+    display: flex;
+    color: #fff;
+    font-family: Orbitron;
+    height: 100%;
+    justify-content: center;
+
+    .leaderboard {
+        flex-grow: 1;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.75);
+        border-radius: 2px;
+        margin-right:2px;
+        max-width: 300px;
+    }
+
+    .leaderboard {
+        .title {
+            padding: 8px;
+            font-size: 12px;
+            color: #757575;
+            text-align: center;
+        }
+
+        .score {
+            color: #e923f3;
+            min-width: 110px;
+            text-align: right;
+        }
+
+        .row {
+            padding: 2px 8px;
+            display: flex;
+            font-size: 12px;
+            margin: 2px;
+
+            .name {
+                flex-grow: 1;
+            }
+
+            .time {
+                width: 45px;
+                text-align: right;
+                color: #999;
+            }
+
+            &.new-score {
+                background: #44d21a;
+                border-radius: 2px;
+
+                .name, .time, .score {
+                    color: #000;
+                }
+            }
+        }
+    }
+}
+
+
+.prompt {
+    position: absolute;
+    top: 40px;
+    left: 120px;
+    right: 120px;
+    background: #000;
+    border-radius: 2px;
+    padding: 16px;
+    font-family: Orbitron;
+
+    .header {
+        color: #00ff47;
+        text-align: center;
+        font-size: 32px;
+    }
+
+    .subheader {
+        color: #aaa;
+        text-align: center;
+    }
+
+    input {
+        background: #666;
+        border: 0;
+        border-radius: 4px;
+        margin: 12px 0px;
+        font-size: 24px;
+        width: 100%;
+        text-align: center;
+    }
+
+    .buttons {
+        display: flex;
+        justify-content: center;
+
+        .cancel, .submit {
+            padding: 12px;
+            min-width: 120px;
+            text-align: center;
+            border-radius: 4px;
+            color: #fff;
+            cursor: pointer;
+        }
+
+        .cancel {
+            margin-right: 12px;
+            background: #666;
+
+            &:hover {
+                background: #999;
+            }
+        }
+
+        .submit{
+            background: #00fc34;
+
+            &:hover {
+                background: #6cff8b;
+            }
         }
     }
 }

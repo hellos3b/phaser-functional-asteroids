@@ -10,6 +10,8 @@ export const Keys = {
   Restart: 70
 }
 
+let enabled = true
+
 const initialState = _.toObject(false, Object.values(Keys))
 let state = new State(initialState)
 
@@ -42,7 +44,11 @@ export const onKeyAny = c_(
     : entity
 )
 
+export const disable = () => enabled = false
+export const enable = () => enabled = true
+
 const setKeyDown = e => {
+  if (!enabled) return;
   e.preventDefault()
   if (state.hasOwnProperty(e.keyCode)) {
     state[e.keyCode] = true
@@ -50,6 +56,7 @@ const setKeyDown = e => {
 }
 
 const setKeyUp = e => {
+  if (!enabled) return;
   if (state.hasOwnProperty(e.keyCode)) {
     state[e.keyCode] = false
   }

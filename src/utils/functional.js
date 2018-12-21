@@ -123,7 +123,7 @@ export const State = function (initialState) {
     .reduce((res, [key, value]) => {
       return {
         ...res,
-        [key]: isObject(value) ? State(value) : value
+        [key]: value
       }
     }, {})
 

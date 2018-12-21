@@ -4,6 +4,7 @@ import * as Styles from '@/config/styles'
 import * as _ from '@/utils'
 import * as Timer from '@/models/Timer'
 import * as V2 from '@/utils/Vector2'
+import * as Leaderboards from '@/core/Leaderboards'
 
 const SPEED_BONUS = 20
 
@@ -73,18 +74,11 @@ const showEndStats = c_(
   (stage) => {
     showEndText(stage, Styles.restartText, 140, "Press [F] to restart")
     statElement(stage, -140, "JUMPS", stage.$state.jumps)
-    statElement(stage, 0, "TIME", mmss(stage.$state.elapsedTime))
+    statElement(stage, 0, "TIME", _.mmss(stage.$state.elapsedTime))
     statElement(stage, 140, "FLIPS", stage.$state.flips)
+    Leaderboards.submit(stage.$state)
   }
 )
-
-const padZero = val => (val < 10) ? '0' + val : val
-
-const mmss = seconds => {
-	const minutes = Math.floor(seconds / 60)
-	seconds = Math.floor(seconds % 60)
-	return `${padZero(minutes)}:${padZero(seconds)}`
-}
 
 const statElement = (stage, offsetX, name, val) => {
   const width = 100

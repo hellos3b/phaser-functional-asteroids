@@ -8,6 +8,7 @@ import * as Stage from '@/core/Stage'
 export const Create = (opt={}) => {
   const props = Object.assign({
     // methods
+    create  : create,
     update  : update,
     
     // sprite
@@ -32,15 +33,19 @@ export const randomize = stage => {
     position,
     velocity: V2.toTarget( position, randomTarget(stage) ) 
       |> V2.multiply( _.rnd(50, 150) ),
-    frame: _.rnd(0, 4),
+    frame: _.rnd(0, 6),
     angle: _.rnd(0, 359),
     angVelocity: _.rnd(-270, 270)
   }
 }
 
+const create = entity => {
+  Stage.create("AsteroidMarker", { follow: entity }) |> Stage.addEntity(entity.stage)
+}
+
 // update :: (Phaser.State, Entity) -> Entity
 const update = entity => 
-  Physics.outOfBounds(entity)
+  Physics.outOfBounds(entity, 100)
     ? Entity.die(entity)
     : entity
 
@@ -48,14 +53,14 @@ const update = entity =>
 // Creates a random Vector near the center of the stage for the asteroid to accelerate to
 const randomTarget = stage => 
   Stage.centerPosition(stage.game.world) 
-    |> randomizePoint(400)
+    |> randomizePoint(400, 180)
 
 // randomizePoint :: (Int, Vector2) -> Vector2
 // Randomizes a vector by a certain amount
 const randomizePoint = c_(
-  (amt, v) => ({
-    x: _.fluff(v.x, amt),
-    y: _.fluff(v.y, amt)
+  (x, y, v) => ({
+    x: _.fluff(v.x, x),
+    y: _.fluff(v.y, y)
   })
 )
 
@@ -71,10 +76,10 @@ const randomPosition = stage => ({
 const offScreenPositions = stage => 
   randomPosition(stage)
     |> (v => ({
-      0: { x: -32, y: v.y },
-      1: { x: stage.game.width + 32, y:v.y },
-      2: { x: v.x, y: -32 },
-      3: { x: v.x, y: stage.game.height + 32 }
+      0: { x: -64, y: v.y },
+      1: { x: stage.game.width + 64, y:v.y },
+      2: { x: v.x, y: -64 },
+      3: { x: v.x, y: stage.game.height + 64 }
     }))
 
 // rndOffScreenPosition :: Phaser.State -> Vector2

@@ -6,6 +6,7 @@ import * as Timer from '@/models/Timer'
 import { Groups } from '@/core/Groups'
 import { State, pipe, stream, log } from '@/utils/functional'
 
+import '@/gameobjects/AsteroidMarker'
 import * as Asteroid from '@/gameobjects/Asteroid'
 import * as Pickup from '@/gameobjects/Pickup'
 import * as Spaceship from '@/gameobjects/Spaceship'
@@ -47,6 +48,7 @@ const init = (stage, options) => {
 }
 
 const create = stage => {
+  document.querySelector('.leaderboard-container').innerHTML = ''
   stage.$refs.player = Stage.create("Spaceship", {
     position: Stage.centerPosition(stage.world),
     events: {  
@@ -62,6 +64,9 @@ const create = stage => {
 const start = stage => {
   Audio.loop("gameOST")
   startAsteroidTimer(stage)
+  stage.$state.$commit({
+    startTime: new Date().toISOString()
+  })
   // startPickupTimer(stage)
 }
 
@@ -136,13 +141,16 @@ const createAsteroid = stage => {
 // getAsteroidRate :: Phaser.State -> float
 // Returns in ms how often an asteroid should spawn (based on elapsed time)
 const getAsteroidRate = stage => 
-  _.toLerp(0, 60, stage.$state.elapsedTime)  
-    |> _.ilerp(1, 0.15)
+  _.toLerp(0, 120, stage.$state.elapsedTime)  
+    |> _.ilerp(1.4, 0.15)
 
 const onPlayerDie = entity => {
   Audio.stop("gameOST")
+  entity.stage.$state.$commit({
+    end: true,
+    endTime: new Date().toISOString()
+  })
   UI.showFinalScore(entity.stage)
-  entity.stage.$state.$commit({ end: true })
 }
 
 const addScore = stage => 

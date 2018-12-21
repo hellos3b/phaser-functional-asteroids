@@ -1,6 +1,8 @@
 import * as _ from "@/utils"
 
 export const model = _.Model({
+  startTime   : null,
+  endTime     : null,
   paused      : false,
   started     : true,
   end         : false,

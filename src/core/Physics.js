@@ -96,8 +96,8 @@ const inBoundsX = entity => entity.position.x > 0 && entity.position.x < entity.
 const inBoundsY = entity => entity.position.y > 0
 
 // outOfBounds :: Entity -> Boolean
-export const outOfBounds = entity =>  
-  entity.position.x < -50 
-    || entity.position.x > entity.stage.game.width + 50
-    || entity.position.y < -50 
-    || entity.position.y > entity.stage.game.height + 50
+export const outOfBounds = (entity, amt) =>  
+  entity.position.x < amt*-1 
+    || entity.position.x > entity.stage.game.width + amt
+    || entity.position.y < amt*-1
+    || entity.position.y > entity.stage.game.height + amt

@@ -23,6 +23,15 @@ export const merge = c_(
   (obj1, obj2) => Object.assign(obj1, obj2)
 )
 
+export const padZero = val => (val < 10) ? '0' + val : val
+
+export const mmss = seconds => {
+	const minutes = Math.floor(seconds / 60)
+	seconds = Math.floor(seconds % 60)
+	return `${padZero(minutes)}:${padZero(seconds)}`
+}
+
+
 /* 
   mergeIn :: (Object, Object) -> Object
   Reversed args for merge
