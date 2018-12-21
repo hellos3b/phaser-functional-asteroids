@@ -7,6 +7,9 @@ body #content canvas {
   margin: 0 auto;
   margin-top: 20px;
 }
+.hide {
+  display: none;
+}
 #content {
   position: relative;
   width: 760px;
@@ -14,11 +17,10 @@ body #content canvas {
 }
 #content .overlay {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: #000;
+  top: 250px;
+  left: 20px;
+  right: 20px;
+  bottom: 20px;
 }
 #content .results {
   text-align: center;
@@ -52,5 +54,108 @@ body #content canvas {
 }
 .subtext a:hover {
   color: #7ec9f7;
+}
+.leaderboard-container {
+  display: flex;
+  color: #fff;
+  font-family: Orbitron;
+  height: 100%;
+  justify-content: center;
+}
+.leaderboard-container .leaderboard {
+  flex-grow: 1;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  border-radius: 2px;
+  margin-right: 2px;
+  max-width: 300px;
+}
+.leaderboard-container .leaderboard .title {
+  padding: 8px;
+  font-size: 12px;
+  color: #757575;
+  text-align: center;
+}
+.leaderboard-container .leaderboard .score {
+  color: #e923f3;
+  min-width: 110px;
+  text-align: right;
+}
+.leaderboard-container .leaderboard .row {
+  padding: 2px 8px;
+  display: flex;
+  font-size: 12px;
+  margin: 2px;
+}
+.leaderboard-container .leaderboard .row .name {
+  flex-grow: 1;
+}
+.leaderboard-container .leaderboard .row .time {
+  width: 45px;
+  text-align: right;
+  color: #999;
+}
+.leaderboard-container .leaderboard .row.new-score {
+  background: #44d21a;
+  border-radius: 2px;
+}
+.leaderboard-container .leaderboard .row.new-score .name,
+.leaderboard-container .leaderboard .row.new-score .time,
+.leaderboard-container .leaderboard .row.new-score .score {
+  color: #000;
+}
+.prompt {
+  position: absolute;
+  top: 40px;
+  left: 120px;
+  right: 120px;
+  background: #000;
+  border-radius: 2px;
+  padding: 16px;
+  font-family: Orbitron;
+}
+.prompt .header {
+  color: #00ff47;
+  text-align: center;
+  font-size: 32px;
+}
+.prompt .subheader {
+  color: #aaa;
+  text-align: center;
+}
+.prompt input {
+  background: #666;
+  border: 0;
+  border-radius: 4px;
+  margin: 12px 0px;
+  font-size: 24px;
+  width: 100%;
+  text-align: center;
+}
+.prompt .buttons {
+  display: flex;
+  justify-content: center;
+}
+.prompt .buttons .cancel,
+.prompt .buttons .submit {
+  padding: 12px;
+  min-width: 120px;
+  text-align: center;
+  border-radius: 4px;
+  color: #fff;
+  cursor: pointer;
+}
+.prompt .buttons .cancel {
+  margin-right: 12px;
+  background: #666;
+}
+.prompt .buttons .cancel:hover {
+  background: #999;
+}
+.prompt .buttons .submit {
+  background: #00fc34;
+}
+.prompt .buttons .submit:hover {
+  background: #6cff8b;
 }
 
