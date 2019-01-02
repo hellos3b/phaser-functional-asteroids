@@ -5,7 +5,6 @@ body {
 }
 body #content canvas {
   margin: 0 auto;
-  margin-top: 20px;
 }
 .hide {
   display: none;
